@@ -8,7 +8,7 @@
 ## 🗂️ 팀 문서 & 자료 링크
 
 <p align="center">
-  <a>📒 jira</a> &nbsp;|&nbsp;
+  <a href="https://placid-cyclamen-a90.notion.site/201bccba6df980c6bda6dc08abe0b892?pvs=73">📒 팀 노션</a> &nbsp;|&nbsp;
 </p>
 
 <br/>
@@ -33,9 +33,9 @@ $ npm start
 # 2. Team Members (팀원 및 팀 소개)
 | 박태원 |
 |:------:|
-| <img src="https://github.com/user-attachments/assets/c1c2b1e3-656d-4712-98ab-a15e91efa2da" alt="이동규" width="150"> |
+| 이미지 추가 예정 |
 | PL |
-| [GitHub](https://github.com/LDK1009) |
+| [GitHub](https://github.com/now-eat-krap) |
 
 <br/>
 <br/>
@@ -50,7 +50,7 @@ $ npm start
 # 4. Tasks & Responsibilities (작업 및 역할 분담)
 |  |  |  |
 |-----------------|-----------------|-----------------|
-| 박태원    |  사진추가예정정 | <ul><li>프로젝트 계획 및 관리</li><li>팀 리딩 및 커뮤니케이션</li><li>커스텀훅 개발</li></ul>     |
+| 박태원    |  사진추가예정 | 추가예정     |
 
 
 <br/>
