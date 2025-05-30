@@ -1,5 +1,5 @@
-<a href="https://club-project-one.vercel.app/" target="_blank">
-<img src="https://github.com/user-attachments/assets/daa622b9-7c69-4786-8db3-4996b7f140be" alt="배너" width="100%"/>
+<a target="_blank">
+<img  alt="배너" width="100%"/>
 </a>
 
 <br/>
@@ -8,7 +8,7 @@
 ## 🗂️ 팀 문서 & 자료 링크
 
 <p align="center">
-  <a href="https://oneul-pjt.notion.site/SSAFY-1d2bc43cad598007adaff9d1b7e0235f">📒 jira</a> &nbsp;|&nbsp;
+  <a>📒 jira</a> &nbsp;|&nbsp;
 </p>
 
 <br/>
@@ -50,7 +50,7 @@ $ npm start
 # 4. Tasks & Responsibilities (작업 및 역할 분담)
 |  |  |  |
 |-----------------|-----------------|-----------------|
-| 박태원    |  <img src="https://github.com/user-attachments/assets/c1c2b1e3-656d-4712-98ab-a15e91efa2da" alt="박태원" width="100"> | <ul><li>프로젝트 계획 및 관리</li><li>팀 리딩 및 커뮤니케이션</li><li>커스텀훅 개발</li></ul>     |
+| 박태원    |  사진추가예정정 | <ul><li>프로젝트 계획 및 관리</li><li>팀 리딩 및 커뮤니케이션</li><li>커스텀훅 개발</li></ul>     |
 
 
 <br/>
