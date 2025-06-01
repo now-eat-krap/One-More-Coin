@@ -36,7 +36,7 @@
 
         <!-- 우측 버튼들 -->
         <div class="hidden md:flex items-center space-x-4">
-          <button class="px-5 py-2 border border-stone-400/20 rounded-lg text-base">Log in</button>
+          <routerLink to="/login" class="px-5 py-2 border border-stone-400/20 rounded-lg text-base">Log in</routerLink>
           <button class="px-5 py-2 bg-yellow-600 rounded-lg text-base hover:bg-yellow-800">
             Try it free
           </button>
