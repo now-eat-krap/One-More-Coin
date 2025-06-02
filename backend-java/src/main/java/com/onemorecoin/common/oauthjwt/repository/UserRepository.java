@@ -1,8 +1,8 @@
-package com.onemorecoin.oauthjwt.repository;
+package com.onemorecoin.common.oauthjwt.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.onemorecoin.oauthjwt.entity.UserEntity;
+import com.onemorecoin.common.oauthjwt.entity.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
 

@@ -1,4 +1,4 @@
-package com.onemorecoin.oauthjwt.dto;
+package com.onemorecoin.common.oauthjwt.dto;
 
 import java.util.ArrayList;
 import java.util.Collection;

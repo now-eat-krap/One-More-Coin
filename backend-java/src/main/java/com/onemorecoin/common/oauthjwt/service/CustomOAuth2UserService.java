@@ -1,4 +1,4 @@
-package com.onemorecoin.oauthjwt.service;
+package com.onemorecoin.common.oauthjwt.service;
 
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
@@ -6,14 +6,14 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import com.onemorecoin.oauthjwt.dto.CustomOAuth2User;
-import com.onemorecoin.oauthjwt.dto.UserDto;
-import com.onemorecoin.oauthjwt.dto.response.GoogleResponse;
-import com.onemorecoin.oauthjwt.dto.response.KakaoResponse;
-import com.onemorecoin.oauthjwt.dto.response.NaverResponse;
-import com.onemorecoin.oauthjwt.dto.response.OAuth2Response;
-import com.onemorecoin.oauthjwt.entity.UserEntity;
-import com.onemorecoin.oauthjwt.repository.UserRepository;
+import com.onemorecoin.common.oauthjwt.dto.CustomOAuth2User;
+import com.onemorecoin.common.oauthjwt.dto.UserDto;
+import com.onemorecoin.common.oauthjwt.dto.response.GoogleResponse;
+import com.onemorecoin.common.oauthjwt.dto.response.KakaoResponse;
+import com.onemorecoin.common.oauthjwt.dto.response.NaverResponse;
+import com.onemorecoin.common.oauthjwt.dto.response.OAuth2Response;
+import com.onemorecoin.common.oauthjwt.entity.UserEntity;
+import com.onemorecoin.common.oauthjwt.repository.UserRepository;
 
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
