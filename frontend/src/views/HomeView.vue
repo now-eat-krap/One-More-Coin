@@ -8,16 +8,16 @@
       <div class="mx-auto max-w-7xl flex flex-col items-center gap-12">
         <!-- 제목 -->
         <h1
-          class="text-stone-200 font-['Roboto_Serif'] font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-center leading-snug sm:leading-tight"
+          class="text-stone-200 font-['Roboto_Serif'] font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-center leading-snug sm:leading-tight animate-fade-in-up"
         >
-          Backtest Your Strategies with Ease
+          당신만의 전략으로<br class="hidden sm:block" />수익을 창출하세요
         </h1>
 
         <!-- Get Started 버튼 -->
         <button
-          class="px-6 py-3 bg-yellow-600 rounded-lg text-stone-200 font-['Public_Sans'] font-medium text-base sm:text-lg md:text-xl hover:bg-yellow-800 transition"
+          class="px-6 py-3 bg-yellow-600 rounded-lg text-stone-200 font-['Public_Sans'] font-medium text-base sm:text-lg md:text-xl hover:bg-yellow-800 transition animate-fade-in-up animation-delay-200"
         >
-          Get Started
+          전략 백테스트 시작하기
         </button>
       </div>
     </section>
@@ -26,7 +26,7 @@
     <section class="pt-12 pb-20 px-4 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-4xl">
         <div
-          class="relative bg-black/80 rounded-2xl shadow-[0px_12px_27px_rgba(0,0,0,0.03),0px_50px_50px_rgba(0,0,0,0.03),0px_112px_67px_rgba(0,0,0,0.02)] outline outline-[1.5px] outline-stone-400/20 overflow-hidden"
+          class="relative bg-black/80 rounded-2xl shadow-[0px_12px_27px_rgba(0,0,0,0.03),0px_50px_50px_rgba(0,0,0,0.03),0px_112px_67px_rgba(0,0,0,0.02)] outline outline-[1.5px] outline-stone-400/20 overflow-hidden animate-fade-in-up animation-delay-400"
         >
           <!-- 카드 전체 크기를 비율로 잡아주기 위함 -->
           <div class="pt-[56.25%]"></div>
@@ -37,7 +37,7 @@
             <!-- 1) 상단 로고 + Explore 버튼 -->
             <div class="flex items-center justify-between p-5">
               <!-- 왼쪽 로고 + 텍스트 -->
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 animate-fade-in-right">
                 <svg
                   class="h-8 w-8 sm:h-10 sm:w-10 text-yellow-500"
                   viewBox="0 0 49 48"
@@ -57,23 +57,26 @@
 
               <!-- 오른쪽 Explore 버튼 -->
               <button
-                class="px-4 py-2 bg-yellow-600 rounded-lg text-stone-200 font-['Public_Sans'] font-medium text-sm sm:text-base hover:bg-yellow-800 transition"
+                class="px-4 py-2 bg-yellow-600 rounded-lg text-stone-200 font-['Public_Sans'] font-medium text-sm sm:text-base hover:bg-yellow-800 transition animate-fade-in-left"
               >
-                Explore
+                전략 둘러보기
               </button>
             </div>
 
             <!-- 2) 카드 본문: 왼쪽에 두 개의 큰 사각형, 오른쪽에 세로 사각형 -->
             <div class="flex-1 grid grid-cols-3 gap-4 px-5 pb-5">
-              <!-- 왼쪽 두 개 박스 (col-span-2) -->
-              <div class="col-span-2 flex flex-col gap-4">
-                <!-- 위 박스 -->
-                <div class="flex-1 bg-stone-800 rounded-lg shadow-inner"></div>
-                <!-- 아래 박스 -->
-                <div class="flex-1 bg-stone-800 rounded-lg shadow-inner"></div>
+              <!-- 왼쪽 박스: 통합 차트 애니메이션 -->
+              <div class="col-span-2 flex-1 bg-stone-800 rounded-lg shadow-inner relative overflow-hidden animate-fade-in-up animation-delay-600">
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <!-- 차트 영역 -->
+                </div>
               </div>
               <!-- 오른쪽 세로 박스 -->
-              <div class="bg-stone-800 rounded-lg shadow-inner"></div>
+              <div class="bg-stone-800 rounded-lg shadow-inner relative overflow-hidden animate-fade-in-up animation-delay-800">
+                <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 p-4">
+                  <!-- 성과 지표 영역 -->
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -83,9 +86,78 @@
 </template>
 
 <script setup>
-// 특별히 스크립트 로직은 필요 없습니다.
+import { ref, onMounted, onUnmounted } from 'vue'
+
+// 컴포넌트 언마운트 시 인터벌 정리
+onUnmounted(() => {
+  if (animationInterval) {
+    clearInterval(animationInterval)
+  }
+})
 </script>
 
 <style scoped>
-/* 추가 커스텀 스타일이 필요하면 여기에 작성하세요. */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-right {
+  animation: fadeInRight 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animate-fade-in-left {
+  animation: fadeInLeft 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.animation-delay-200 {
+  animation-delay: 200ms;
+}
+
+.animation-delay-400 {
+  animation-delay: 400ms;
+}
+
+.animation-delay-600 {
+  animation-delay: 600ms;
+}
+
+.animation-delay-800 {
+  animation-delay: 800ms;
+}
 </style>
