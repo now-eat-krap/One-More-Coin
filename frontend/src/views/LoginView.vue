@@ -47,111 +47,32 @@
           구글로 로그인
         </button>
       </div>
-
-      <!-- 구분선 -->
-      <div class="relative">
-        <div class="absolute inset-0 flex items-center">
-          <div class="w-full border-t border-stone-400/20"></div>
-        </div>
-        <div class="relative flex justify-center text-sm">
-          <span class="px-2 bg-stone-950 text-stone-400">또는</span>
-        </div>
-      </div>
-
-      <!-- 이메일 로그인 폼 -->
-      <form class="mt-8 space-y-6" @submit.prevent="handleEmailLogin">
-        <div class="space-y-4">
-          <div>
-            <label for="email" class="sr-only">이메일</label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              required
-              class="w-full px-4 py-3 bg-stone-900 border border-stone-400/20 rounded-lg text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-              placeholder="이메일"
-            />
-          </div>
-          <div>
-            <label for="password" class="sr-only">비밀번호</label>
-            <input
-              id="password"
-              v-model="password"
-              type="password"
-              required
-              class="w-full px-4 py-3 bg-stone-900 border border-stone-400/20 rounded-lg text-stone-200 placeholder-stone-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-              placeholder="비밀번호"
-            />
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
-            <input
-              id="remember-me"
-              v-model="rememberMe"
-              type="checkbox"
-              class="h-4 w-4 text-yellow-500 focus:ring-yellow-500 border-stone-400/20 rounded"
-            />
-            <label for="remember-me" class="ml-2 block text-sm text-stone-400">
-              로그인 상태 유지
-            </label>
-          </div>
-
-          <div class="text-sm">
-            <a href="#" class="text-yellow-500 hover:text-yellow-400">
-              비밀번호를 잊으셨나요?
-            </a>
-          </div>
-        </div>
-
-        <div>
-          <button
-            type="submit"
-            class="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-stone-200 bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
-          >
-            로그인
-          </button>
-        </div>
-      </form>
-
-      <!-- 회원가입 링크 -->
-      <div class="text-center text-sm">
-        <span class="text-stone-400">계정이 없으신가요?</span>
-        <a href="#" class="ml-1 text-yellow-500 hover:text-yellow-400">회원가입</a>
-      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-
-const email = ref('')
-const password = ref('')
-const rememberMe = ref(false)
-
-const handleEmailLogin = () => {
-  // 이메일 로그인 로직 구현
-  console.log('Email login:', { email: email.value, password: password.value, rememberMe: rememberMe.value })
-}
+import api from '@/plugins/axios'
 
 const handleNaverLogin = () => {
   // 네이버 OAuth 로그인 로직 구현
+  window.location.href = 'http://localhost:8080/oauth2/authorization/naver'
   console.log('Naver login clicked')
 }
 
 const handleKakaoLogin = () => {
   // 카카오 OAuth 로그인 로직 구현
+  window.location.href = 'http://localhost:8080/oauth2/authorization/kakao'
   console.log('Kakao login clicked')
 }
 
 const handleGoogleLogin = () => {
   // 구글 OAuth 로그인 로직 구현
+  window.location.href = 'http://localhost:8080/oauth2/authorization/google'
   console.log('Google login clicked')
 }
 </script>
 
 <style scoped>
 /* 추가 스타일이 필요한 경우 여기에 작성 */
-</style> 
+</style>
