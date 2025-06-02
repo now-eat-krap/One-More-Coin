@@ -1,4 +1,4 @@
-package com.onemorecoin.oauthjwt.dto.response;
+package com.onemorecoin.common.oauthjwt.dto.response;
 
 public interface OAuth2Response {
 
