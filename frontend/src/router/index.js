@@ -1,6 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import LoginView from '../views/LoginView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -9,17 +7,22 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView,
+      component: () => import('@/views/common/HomeView.vue'),
     },
     {
       path: '/login',
       name: 'login',
-      component: LoginView,
+      component: () => import('@/views/common/LoginView.vue'),
     },
     {
       path: '/oauth-callback',
       name: 'OAuthCallback',
-      component: () => import('@/views/OAuthCallback.vue'),
+      component: () => import('@/views/common/OAuthCallback.vue'),
+    },
+    {
+      path: '/chart',
+      name: 'chart',
+      component: () => import('@/views/chart/ChartView.vue'),
     },
   ],
 })

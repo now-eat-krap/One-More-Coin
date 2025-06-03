@@ -1,6 +1,9 @@
 package com.onemorecoin.common.oauthjwt.service;
 
+import java.io.IOException;
 import java.sql.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -58,7 +61,7 @@ public class ReissueServiceImpl implements ReissueService {
         }
         
         //DB에 저장되어 있는지 확인
-    	Boolean isExist = refreshTokenRepository.existsByRefresh(refresh);
+    	Boolean isExist = refreshTokenRepository.existsById(refresh);
     	if (!isExist) {
     		
 		   //response body
@@ -71,20 +74,24 @@ public class ReissueServiceImpl implements ReissueService {
         String name = jwtUtil.getName(refresh);
         String role = jwtUtil.getRole(refresh);
 
-        // 5. access token 재발급
+     // 5. access token 재발급
         String newAccess = jwtUtil.createJwt("access", username, name, role, 600000L);
-        // refresh rotate -> 리프레시 토큰이 사용되면 새로발급
         String newRefresh = jwtUtil.createJwt("refresh", username, name, role, 86400000L);
         
-        
         //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
-        System.out.println("deleteRefreshToken");
-    	refreshTokenRepository.deleteByRefresh(refresh);
-    	addRefreshEntity(username, newRefresh, 86400000L);
+        //System.out.println(refresh);
+        refreshTokenRepository.deleteById(refresh);
+        addRefreshEntity(username, newRefresh, 86400000L);
         
+        // 응답 헤더에 토큰 설정
         response.setHeader("access", newAccess);
         response.addCookie(createCookie("refresh", newRefresh));
-        return new ResponseEntity<>(HttpStatus.OK);
+
+        // JSON 응답으로 변경
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("accessToken", newAccess);
+        
+        return new ResponseEntity<>(responseBody, HttpStatus.OK);
     }
 	
 	private void addRefreshEntity(String username, String refresh, Long expiredMs) {
