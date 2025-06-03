@@ -4,7 +4,7 @@
       <!-- 상단 네비게이션 바 -->
       <nav class="flex items-center justify-between h-16">
         <!-- 로고 영역 -->
-        <RouterLink to="/" class="flex items-center">
+        <RouterLink to="/" class="flex items-center hover:opacity-80 transition-opacity">
           <!-- PNG 로고 -->
           <div class="flex-shrink-0">
             <img src="@/assets/logo.png" alt="Coin Logo" class="h-10" />
@@ -14,10 +14,10 @@
 
         <!-- 네비게이션 링크 (데스크탑) -->
         <div class="hidden md:flex space-x-8">
-          <a href="#" class="hover:text-white font-medium">Home</a>
-          <a href="#" class="hover:text-white font-medium">Features</a>
-          <a href="#" class="hover:text-white font-medium">Pricing</a>
-          <a href="#" class="hover:text-white font-medium">Contact</a>
+          <RouterLink to="/" class="hover:text-white font-medium">Home</RouterLink>
+          <RouterLink to="/features" class="hover:text-white font-medium">Features</RouterLink>
+          <RouterLink to="/pricing" class="hover:text-white font-medium">Pricing</RouterLink>
+          <RouterLink to="/contact" class="hover:text-white font-medium">Contact</RouterLink>
         </div>
 
         <!-- 우측 버튼들 -->
@@ -133,38 +133,38 @@
       <transition name="fade">
         <div v-if="mobileOpen" class="md:hidden bg-stone-900/90 backdrop-blur-sm">
           <nav class="px-4 pt-2 pb-4 space-y-2">
-            <a href="#" class="block py-2 hover:text-white font-medium">Home</a>
-            <a href="#" class="block py-2 hover:text-white font-medium">Features</a>
-            <a href="#" class="block py-2 hover:text-white font-medium">Pricing</a>
-            <a href="#" class="block py-2 hover:text-white font-medium">Contact</a>
+            <RouterLink to="/" class="block py-2 hover:text-white font-medium">Home</RouterLink>
+            <RouterLink to="/features" class="block py-2 hover:text-white font-medium">Features</RouterLink>
+            <RouterLink to="/pricing" class="block py-2 hover:text-white font-medium">Pricing</RouterLink>
+            <RouterLink to="/contact" class="block py-2 hover:text-white font-medium">Contact</RouterLink>
             <div class="mt-2 border-t border-stone-700"></div>
             <template v-if="!isLoggedIn">
-              <routerLink
+              <RouterLink
                 to="/login"
                 class="w-full text-left py-2 border-b border-stone-700 font-medium"
               >
                 Log in
-              </routerLink>
+              </RouterLink>
             </template>
             <template v-else>
               <div class="py-3 border-b border-stone-700">
                 <div class="text-base text-stone-200">{{ userName }}님</div>
                 <div class="text-sm text-stone-400">환영합니다</div>
               </div>
-              <a
-                href="#"
+              <RouterLink
+                to="/profile"
                 class="block py-3 text-base hover:text-white font-medium"
                 @click="mobileOpen = false"
               >
                 내 정보
-              </a>
-              <a
-                href="#"
+              </RouterLink>
+              <RouterLink
+                to="/settings"
                 class="block py-3 text-base hover:text-white font-medium"
                 @click="mobileOpen = false"
               >
                 설정
-              </a>
+              </RouterLink>
               <button @click="handleLogout" class="w-full text-left py-3 text-base font-medium">
                 로그아웃
               </button>
@@ -177,10 +177,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted } from 'vue'
+import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import api from '@/plugins/axios'
+import { isTokenExpired, getTokenExpirationTime } from '@/utils/token'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -191,6 +192,25 @@ const isUserMenuOpen = ref(false)
 const isLoggedIn = computed(() => authStore.isLoggedIn)
 const userName = computed(() => authStore.userName)
 
+// 토큰 만료 체크 함수
+const checkTokenExpiration = () => {
+  const token = localStorage.getItem('access')
+  if (token) {
+    if (isTokenExpired(token)) {
+      console.log('토큰이 만료되었습니다.')
+    }
+    const expirationTime = getTokenExpirationTime(token)
+    console.log('토큰 만료 시간:', expirationTime)
+  }
+}
+
+// 로그인 상태가 변경될 때마다 토큰 만료 체크
+watch(isLoggedIn, (newValue) => {
+  if (newValue) {
+    checkTokenExpiration()
+  }
+})
+
 // 로그인 상태 확인
 onMounted(() => {
   const name = localStorage.getItem('name')
@@ -200,6 +220,9 @@ onMounted(() => {
 
   // 드롭다운 메뉴 외부 클릭 시 닫기
   document.addEventListener('click', handleClickOutside)
+
+  // 초기 토큰 만료 체크
+  checkTokenExpiration()
 })
 
 onUnmounted(() => {

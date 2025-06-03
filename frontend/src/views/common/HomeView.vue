@@ -14,11 +14,12 @@
         </h1>
 
         <!-- Get Started 버튼 -->
-        <button
+        <RouterLink
+          to="/chart"
           class="px-6 py-3 bg-yellow-600 rounded-lg text-stone-200 font-['Public_Sans'] font-medium text-base sm:text-lg md:text-xl hover:bg-yellow-800 transition animate-fade-in-up animation-delay-200"
         >
           전략 백테스트 시작하기
-        </button>
+        </RouterLink>
       </div>
     </section>
 
@@ -66,13 +67,17 @@
             <!-- 2) 카드 본문: 왼쪽에 두 개의 큰 사각형, 오른쪽에 세로 사각형 -->
             <div class="flex-1 grid grid-cols-3 gap-4 px-5 pb-5">
               <!-- 왼쪽 박스: 통합 차트 애니메이션 -->
-              <div class="col-span-2 flex-1 bg-stone-800 rounded-lg shadow-inner relative overflow-hidden animate-fade-in-up animation-delay-600">
+              <div
+                class="col-span-2 flex-1 bg-stone-800 rounded-lg shadow-inner relative overflow-hidden animate-fade-in-up animation-delay-600"
+              >
                 <div class="absolute inset-0 flex items-center justify-center">
                   <!-- 차트 영역 -->
                 </div>
               </div>
               <!-- 오른쪽 세로 박스 -->
-              <div class="bg-stone-800 rounded-lg shadow-inner relative overflow-hidden animate-fade-in-up animation-delay-800">
+              <div
+                class="bg-stone-800 rounded-lg shadow-inner relative overflow-hidden animate-fade-in-up animation-delay-800"
+              >
                 <div class="absolute inset-0 flex flex-col items-center justify-center gap-4 p-4">
                   <!-- 성과 지표 영역 -->
                 </div>
@@ -88,10 +93,12 @@
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
 
+const animationInterval = ref(null)
+
 // 컴포넌트 언마운트 시 인터벌 정리
 onUnmounted(() => {
-  if (animationInterval) {
-    clearInterval(animationInterval)
+  if (animationInterval.value) {
+    clearInterval(animationInterval.value)
   }
 })
 </script>

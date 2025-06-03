@@ -95,6 +95,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
 
         //로그아웃 진행
         //Refresh 토큰 DB에서 제거
+        System.out.println("로그아웃 완료");
         refreshRepository.deleteById(refresh);
 
         //Refresh 토큰 Cookie 값 0

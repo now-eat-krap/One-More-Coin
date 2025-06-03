@@ -24,11 +24,8 @@ public class ReissueController {
 
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
+    	System.out.println("reissue 토큰 재발급");
         return reissueService.reissue(request, response);
     }
     
-    @GetMapping("/my")
-    public ResponseEntity<?> my() {
-    	return ResponseEntity.ok().build();
-    }
 }

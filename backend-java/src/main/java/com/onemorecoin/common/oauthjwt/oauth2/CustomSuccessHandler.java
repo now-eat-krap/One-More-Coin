@@ -33,8 +33,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
 	@Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
-		
-		System.out.println("hello");
+
         //OAuth2User
         CustomOAuth2User customUserDetails = (CustomOAuth2User) authentication.getPrincipal();
 
@@ -47,8 +46,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String role = auth.getAuthority();
 
         //토큰 생성
-//        String access = jwtUtil.createJwt("access", username, name, role, 600000L);
-        String access = jwtUtil.createJwt("access", username, name, role, 1000L);
+        String access = jwtUtil.createJwt("access", username, name, role, 600000L);
         String refresh = jwtUtil.createJwt("refresh", username, name, role, 86400000L);
 
         //Refresh 토큰 저장
