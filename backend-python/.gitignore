@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.log
+
+# Virtual environment
+venv/
+.env/
+.envrc
+*.env
+.venv/
+
+# Jupyter
+.ipynb_checkpoints
+
+# VSCode 설정
+.vscode/
+
+# macOS
+.DS_Store
+
+# PyCharm 설정
+.idea/
+
+# mypy
+.mypy_cache/
+
+# Coverage
+htmlcov/
+.coverage
+
+# 기타
+*.db
+*.sqlite3
+
+# Uvicorn / Gunicorn 로그
+*.pid
+*.log
+
+# OS junk
+Thumbs.db
