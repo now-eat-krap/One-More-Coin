@@ -9,10 +9,11 @@ router = APIRouter()
 
 @router.get("/candles", response_model=List[Candle])
 async def read_candles(
+    exchange: str = Query(...),
     symbol: str = Query(...),
     interval: str = Query(...),
     limit: int = Query(300),
     end: Optional[int] = Query(None),
     # credentials: HTTPAuthorizationCredentials = Depends(verify_jwt),
 ):
-    return await get_candles(symbol, interval, limit, end)
+    return await get_candles(exchange, symbol, interval, limit, end)

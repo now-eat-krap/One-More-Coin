@@ -13,7 +13,7 @@ INTERVAL_TABLE_MAP = {
     "1M": "klines_1month",
 }
 
-async def get_candles(symbol: str, interval: str, limit: int, end: Optional[int] = None):
+async def get_candles(exchange: str, symbol: str, interval: str, limit: int, end: Optional[int] = None):
     db_url = os.getenv("DB_URL")
     if not db_url:
         raise RuntimeError("DB_URL 환경변수가 설정되지 않았습니다.")
@@ -24,29 +24,31 @@ async def get_candles(symbol: str, interval: str, limit: int, end: Optional[int]
 
     time_column = "open_time" if interval == "1m" else "bucket"
     
-    where_clause = f"WHERE symbol = $1"
-    params = [symbol.upper()]
+    # WHERE 절에 exchange와 symbol을 모두 포함
+    where_clause = f"WHERE exchange = $1 AND symbol = $2"
+    params = [exchange, symbol.upper()]
 
     if end is not None:
         where_clause += f" AND {time_column} <= to_timestamp(${len(params) + 1})"
         params.append(end)
 
     query = f"""
-        SELECT EXTRACT(EPOCH FROM {time_column}) AS time,
-               {"open_price" if interval == "1m" else "open"} AS open,
-               {"high_price" if interval == "1m" else "high"} AS high,
-               {"low_price" if interval == "1m" else "low"} AS low,
-               {"close_price" if interval == "1m" else "close"} AS close
+        SELECT 
+            EXTRACT(EPOCH FROM {time_column}) AS time,
+            {"open_price" if interval == "1m" else "open"} AS open,
+            {"high_price" if interval == "1m" else "high"} AS high,
+            {"low_price" if interval == "1m" else "low"} AS low,
+            {"close_price" if interval == "1m" else "close"} AS close
         FROM {table_name}
         {where_clause}
         ORDER BY {time_column} DESC
         LIMIT ${len(params) + 1}
     """
     params.append(limit)
-    
-    conn = await asyncpg.connect(dsn=db_url)
 
+    conn = await asyncpg.connect(dsn=db_url)
     rows = await conn.fetch(query, *params)
     await conn.close()
 
-    return [dict(row) for row in reversed(rows)]  # 시간 오름차순
+    # 시간 오름차순으로 리턴
+    return [dict(row) for row in reversed(rows)]

@@ -1,216 +1,275 @@
+<!-- src/components/chart/LiveChart.vue -->
 <template>
-  <!-- 캔들 차트가 그려질 컨테이너 -->
-  <div ref="chartContainer" class="chart-wrapper h-full"></div>
+  <div class="h-full flex flex-col">
+    <div class="bg-[#161A25] p-3 flex flex-wrap items-center">
+      <span class="text-2xl font-bold">{{ symbol.toUpperCase() }}</span>
+      <span class="text-xl font-bold ml-2">. {{ exchange.toUpperCase() }}</span>
+      <span v-if="currentPrice !== null" :class="priceColorClass" class="text-xl ml-4">
+        {{ formattedPrice }}
+      </span>
+    </div>
+
+    <div class="relative flex-1">
+      <!-- 메인 캔들 차트 -->
+      <div ref="chartContainer" class="flex-1 chart-wrapper"></div>
+
+      <!-- legend -->
+      <div ref="legend" class="absolute top-2 left-2 text-xs max-w-[90%] z-10">
+        <div ref="dataDiv" class="flex flex-wrap items-center space-x-1"></div>
+        <div ref="indicatorDiv"></div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import axios from 'axios'
-import { createChart, CrosshairMode, CandlestickSeries } from 'lightweight-charts'
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
+import { useChart } from '@/composables/useChart'
+import { useCandleData } from '@/composables/useCandleData'
+import { mapIndicators, useIndicators } from '@/composables/useIndicators'
+import { useChartUI } from '@/composables/useChartUI'
+import { intervalToSeconds } from '@/constants/chart'
 
-// ----------------------
-// 1) 상수 설정
-// ----------------------
-// ----------------------
-// 1) Props 정의
-// ----------------------
 const props = defineProps({
-  symbol: {
-    type: String,
-    required: true,
-  },
-  interval: {
-    type: String,
-    required: true,
-  },
-  initialLimit: {
-    type: Number,
-    default: 10000, // 과거 불러올 캔들 총 개수(기본)
-  },
+  symbol: { type: String, required: true },
+  exchange: { type: String, required: true },
+  interval: { type: String, required: true },
+  indicators: { type: Array, required: [] },
 })
 
-console.log('hello', props.symbol, props.interval)
-
-const symbol = props.symbol // 소문자 심볼
-const interval = props.interval // 캔들 간격
-const totalCount = 10000 // 불러올 캔들 총 개수
-const pageLimit = 1000 // 한 번에 가져올 수 있는 최대 개수 (Binance 제한)
-
-// ----------------------
-// 2) ref & 변수 선언
-// ----------------------
 const chartContainer = ref(null)
-let chart = null
-let candleSeries = null
-let ws = null
+const legend = ref(null)
+// initChartWithInitialCandles 밖에서도 사용할 수 있게 스코프 선언
+let updateAllSeries, activeSeries
 
-// ----------------------
-// 3) 페이징으로 과거 캔들 데이터 불러오기
-// ----------------------
-async function fetchHistoricalDataPaged() {
-  const candles = []
-  let fetched = 0
-  let endTime = undefined
+const {
+  chart,
+  candleSeries,
+  indicatorSeries,
+  initChart,
+  cleanup: cleanupChart,
+} = useChart(chartContainer, props)
 
-  // USDT-M 선물용
-  // let url =
-  //   `https://fapi.binance.com/fapi/v1/klines` +
-  //   `?symbol=${symbol.toUpperCase()}` +
-  //   `&interval=${interval}` +
-  //   `&limit=${limit}`
+const {
+  currentCandles,
+  oldestTime,
+  isLoading,
+  loadInitialCandlesFromBinance,
+  loadOlderCandlesFromTimescale,
+  connectWebSocket,
+  cleanup: cleanupData,
+} = useCandleData(props)
 
-  while (fetched < totalCount) {
-    const limit = Math.min(pageLimit, totalCount - fetched)
-    let url = `https://api.binance.com/api/v3/klines?symbol=${symbol.toUpperCase()}&interval=${interval}&limit=${limit}`
-    if (endTime !== undefined) {
-      url += `&endTime=${endTime}`
-    }
-    const resp = await axios.get(url)
-    if (!resp.data || resp.data.length === 0) break
+const {
+  currentPrice,
+  previousPrice,
+  dataDiv,
+  indicatorDiv,
+  formattedPrice,
+  priceColorClass,
+  updateDataDivWithCandle,
+  updateIndicatorDiv, // ← 추가
+} = useChartUI(props)
 
-    const batch = resp.data.map((arr) => ({
-      time: arr[0] / 1000,
-      open: parseFloat(arr[1]),
-      high: parseFloat(arr[2]),
-      low: parseFloat(arr[3]),
-      close: parseFloat(arr[4]),
-    }))
-    candles.push(...batch)
-    fetched += batch.length
-    endTime = resp.data[resp.data.length - 1][0] - 1
+async function initChartWithInitialCandles() {
+  const { chart: chartInstance, candleSeries: series } = initChart()
+  if (!chartInstance || !series) return
+  ;({ updateAllSeries, activeSeries } = useIndicators(chartInstance, series, props))
+
+  const initialCandles = await loadInitialCandlesFromBinance()
+  currentCandles.value = [...initialCandles].sort((a, b) => a.time - b.time)
+  series.setData(currentCandles.value)
+  oldestTime.value = currentCandles.value[0]?.time || 0
+  chartInstance.timeScale().fitContent()
+
+  if (currentCandles.value.length) {
+    currentPrice.value = currentCandles.value.slice(-1)[0].close
+    updateDataDivWithCandle(currentCandles.value.slice(-1)[0])
   }
+  updateAllSeries(currentCandles.value)
 
-  // 정렬
-  candles.sort((a, b) => a.time - b.time)
-
-  // 중복 제거 (같은 time 값이 있으면 첫 번째만 남김)
-  const unique = []
-  for (const c of candles) {
-    if (unique.length === 0 || unique[unique.length - 1].time !== c.time) {
-      unique.push(c)
-    }
-  }
-
-  return unique
-}
-
-// ----------------------
-// 4) 차트 초기화 (과거 데이터 포함)
-// ----------------------
-async function initChartWithHistory() {
-  if (!chartContainer.value) return
-
-  chart = createChart(chartContainer.value, {
-    width: chartContainer.value.clientWidth,
-    // height: 450,
-    layout: {
-      background: { type: 'solid', color: '#161A25' },
-      textColor: '#FFFFFF',
-    },
-    grid: {
-      vertLines: { color: '#313540' },
-      horzLines: { color: '#313540' },
-    },
-    crosshair: {
-      mode: CrosshairMode.Normal,
-    },
-    rightPriceScale: {
-      //   borderColor: '#cccccc',
-    },
-    timeScale: {
-      //   borderColor: '#cccccc',
-      timeVisible: true,
-      secondsVisible: false,
-    },
-  })
-
-  if (!chart || typeof chart.addSeries !== 'function') return
-
-  candleSeries = chart.addSeries(CandlestickSeries, {
-    upColor: '#26a69a',
-    downColor: '#ef5350',
-    borderVisible: false,
-    wickUpColor: '#26a69a',
-    wickDownColor: '#ef5350',
-  })
-
-  const history = await fetchHistoricalDataPaged()
-  if (history.length > 0 && candleSeries) {
-    candleSeries.setData(history)
-    chart.timeScale().fitContent()
-  }
-
-  window.addEventListener('resize', resizeChart)
-}
-
-// ----------------------
-// 5) 차트 리사이즈
-// ----------------------
-function resizeChart() {
-  if (chart && chartContainer.value) {
-    chart.applyOptions({ width: chartContainer.value.clientWidth })
-  }
-}
-
-// ----------------------
-// 6) WebSocket 연결 및 실시간 업데이트
-// ----------------------
-function connectWebSocket() {
-  const endpoint = `wss://stream.binance.com:9443/ws/${symbol}@kline_${interval}`
-  ws = new WebSocket(endpoint)
-
-  ws.onopen = () => {
-    console.log(`[WebSocket] Connected: ${endpoint}`)
-  }
-
-  ws.onmessage = (event) => {
-    if (!candleSeries) return
-    try {
-      const raw = JSON.parse(event.data)
-      const k = raw.k
-      const candle = {
-        time: k.t / 1000,
-        open: parseFloat(k.o),
-        high: parseFloat(k.h),
-        low: parseFloat(k.l),
-        close: parseFloat(k.c),
+  chartInstance.timeScale().subscribeVisibleTimeRangeChange(async () => {
+    if (!chartInstance || isLoading.value) return
+    const vis = chartInstance.timeScale().getVisibleRange()
+    if (!vis?.from) return
+    const fromTime = Math.floor(vis.from)
+    const range = Math.floor(vis.to) - fromTime
+    const limit = Math.min(1000, Math.ceil(range / intervalToSeconds[props.interval]))
+    if (fromTime <= oldestTime.value) {
+      isLoading.value = true
+      const offsetMs = new Date().getTimezoneOffset() * 60 * 1000
+      const utcSec = Math.floor((oldestTime.value * 1000 + offsetMs) / 1000)
+      const older = await loadOlderCandlesFromTimescale(utcSec, limit)
+      isLoading.value = false
+      if (older.length) {
+        const existing = new Set(currentCandles.value.map((c) => c.time))
+        const filtered = older.filter((c) => !existing.has(c.time))
+        currentCandles.value = [...filtered, ...currentCandles.value].sort(
+          (a, b) => a.time - b.time,
+        )
+        series.setData(currentCandles.value)
+        oldestTime.value = currentCandles.value[0].time
+        updateAllSeries(currentCandles.value)
       }
-      candleSeries.update(candle)
-    } catch {
-      // 파싱 오류 무시
     }
-  }
+  })
 
-  ws.onerror = (err) => {
-    console.error('[WebSocket] Error:', err)
-  }
+  chartInstance.subscribeCrosshairMove((param) => {
+    if (!dataDiv.value) return
 
-  ws.onclose = () => {
-    console.log('[WebSocket] Closed')
-  }
+    // console.log('hello', param)
+    // 캔들 평소 동작
+    if (!param || param.time === null) {
+      updateDataDivWithCandle(currentCandles.value.slice(-1)[0])
+      // 지표도 마지막 값으로 업데이트
+
+      const lastMap =
+        {} +
+        props.indicators.forEach((key) => {
+          if (key === 'macd') {
+            const hS = activeSeries.macdHist
+            const lS = activeSeries.macdLine
+            const sS = activeSeries.macdSignal
+
+            const hV = hS && param.seriesData.get(hS)?.value
+            const lV = lS && param.seriesData.get(lS)?.value
+            const sV = sS && param.seriesData.get(sS)?.value
+
+            valuesMap.macd = {
+              hist: hV ?? null,
+              macd: lV ?? null,
+              signal: sV ?? null,
+            }
+          } else {
+            const s = activeSeries[key]
+            const p = s && param.seriesData.get(s)
+            valuesMap[key] = p?.value ?? null
+          }
+        })
+      updateIndicatorDiv(lastMap)
+      return
+    }
+
+    // 마우스 위치의 캔들
+    const candle = param.seriesData.get(series)
+    if (candle) {
+      updateDataDivWithCandle(candle)
+      // 지표 값도 함께 뽑아서 업데이트
+      const valuesMap = {}
+      props.indicators.forEach((key) => {
+        if (key === 'macd') {
+          const hS = activeSeries.macdHist
+          const lS = activeSeries.macdLine
+          const sS = activeSeries.macdSignal
+
+          const hV = hS && param.seriesData.get(hS)?.value
+          const lV = lS && param.seriesData.get(lS)?.value
+          const sV = sS && param.seriesData.get(sS)?.value
+
+          valuesMap.macd = {
+            hist: hV ?? null,
+            macd: lV ?? null,
+            signal: sV ?? null,
+          }
+        } else {
+          const s = activeSeries[key]
+          const p = s && param.seriesData.get(s)
+          valuesMap[key] = p?.value ?? null
+        }
+      })
+      updateIndicatorDiv(valuesMap)
+    }
+  })
 }
 
-// ----------------------
-// 7) 정리 (언마운트 시)
-// ----------------------
+function handleWebSocketMessage(candle) {
+  previousPrice.value = currentPrice.value
+  currentPrice.value = candle.close
+
+  const idx = currentCandles.value.findIndex((c) => c.time === candle.time)
+  if (idx >= 0) currentCandles.value[idx] = candle
+  else currentCandles.value.push(candle)
+  currentCandles.value.sort((a, b) => a.time - b.time)
+  candleSeries.value.setData(currentCandles.value)
+  updateDataDivWithCandle(candle)
+  updateAllSeries(currentCandles.value)
+}
+
 function cleanup() {
-  if (ws) ws.close()
-  window.removeEventListener('resize', resizeChart)
-  if (chart) {
-    chart.remove()
-    chart = null
-    candleSeries = null
-  }
+  cleanupChart()
+  cleanupData()
 }
 
 onMounted(async () => {
-  await initChartWithHistory()
-  connectWebSocket()
+  await initChartWithInitialCandles()
+  connectWebSocket(handleWebSocketMessage)
 })
 
-onBeforeUnmount(() => {
-  cleanup()
-})
+// ① props.indicators 변경 감지 → 즉시 렌더
+watch(
+  () => props.indicators,
+  (newList, oldList) => {
+    // updateAllSeries가 아직 할당되지 않았으면 아무 것도 안 함
+    if (typeof updateAllSeries !== 'function') return
+
+    // 1) 차트 위 지표 라인들 업데이트/생성/삭제
+    updateAllSeries(currentCandles.value)
+
+    // 2) UI 영역에도 마지막 지표 값 바로 보여주기
+    /* … */
+  },
+  {
+    deep: true,
+    immediate: false, // 또는 immediate를 false로 변경
+  },
+)
+
+// props.indicators가 변경될 때마다 indicatorDiv 강제 갱신
+watch(
+  () => props.indicators,
+  (newInds) => {
+    if (!indicatorDiv.value) return
+
+    // 1) 지표가 하나도 없으면 즉시 비우기
+    if (newInds.length === 0) {
+      indicatorDiv.value.innerHTML = ''
+      return
+    }
+
+    // 2) 남은 지표만 다시 렌더링
+    const lastMap = {}
+    newInds.forEach((key) => {
+      if (key === 'macd') {
+        const hS = activeSeries.macdHist
+        const lS = activeSeries.macdLine
+        const sS = activeSeries.macdSignal
+
+        const hV = hS && param.seriesData.get(hS)?.value
+        const lV = lS && param.seriesData.get(lS)?.value
+        const sV = sS && param.seriesData.get(sS)?.value
+
+        valuesMap.macd = {
+          hist: hV ?? null,
+          macd: lV ?? null,
+          signal: sV ?? null,
+        }
+      } else {
+        const s = activeSeries[key]
+        const p = s && param.seriesData.get(s)
+        valuesMap[key] = p?.value ?? null
+      }
+    })
+    updateIndicatorDiv(lastMap)
+  },
+  { deep: true, immediate: true },
+)
+
+onBeforeUnmount(() => cleanup())
 </script>
 
-<style scoped></style>
+<style scoped>
+.chart-wrapper {
+  width: 100%;
+  height: 100%;
+}
+</style>
