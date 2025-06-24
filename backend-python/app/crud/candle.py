@@ -26,7 +26,7 @@ async def get_candles(exchange: str, symbol: str, interval: str, limit: int, end
     
     # WHERE 절에 exchange와 symbol을 모두 포함
     where_clause = f"WHERE exchange = $1 AND symbol = $2"
-    params = [exchange, symbol.upper()]
+    params = [exchange.lower(), symbol.upper()]
 
     if end is not None:
         where_clause += f" AND {time_column} <= to_timestamp(${len(params) + 1})"
