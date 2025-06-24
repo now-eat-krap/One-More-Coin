@@ -1,6 +1,29 @@
 <!-- src/components/chart/LiveChart.vue -->
 <template>
-  <div class="h-full flex flex-col">
+  <div class="relative h-full flex flex-col">
+    <div
+      v-if="isLoadingSpinner"
+      class="absolute inset-0 flex items-center justify-center bg-black/70 dark:bg-gray-900/70 z-50"
+      role="status"
+    >
+      <svg
+        aria-hidden="true"
+        class="w-12 h-12 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+        viewBox="0 0 100 101"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z"
+          fill="currentColor"
+        />
+        <path
+          d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z"
+          fill="currentFill"
+        />
+      </svg>
+      <span class="sr-only">Loading...</span>
+    </div>
     <div class="bg-[#161A25] p-3 flex flex-wrap items-center">
       <span class="text-2xl font-bold">{{ symbol.toUpperCase() }}</span>
       <span class="text-xl font-bold ml-2">. {{ exchange.toUpperCase() }}</span>
@@ -16,7 +39,6 @@
       <!-- legend -->
       <div ref="legend" class="absolute top-2 left-2 text-xs max-w-[90%] z-10">
         <div ref="dataDiv" class="flex flex-wrap items-center space-x-1"></div>
-        <div ref="indicatorDiv"></div>
       </div>
     </div>
   </div>
@@ -26,29 +48,25 @@
 import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
 import { useChart } from '@/composables/useChart'
 import { useCandleData } from '@/composables/useCandleData'
-import { mapIndicators, useIndicators } from '@/composables/useIndicators'
 import { useChartUI } from '@/composables/useChartUI'
 import { intervalToSeconds } from '@/constants/chart'
+
+const isLoadingSpinner = ref(false)
 
 const props = defineProps({
   symbol: { type: String, required: true },
   exchange: { type: String, required: true },
   interval: { type: String, required: true },
-  indicators: { type: Array, required: [] },
 })
 
 const chartContainer = ref(null)
 const legend = ref(null)
+const candleSeries = ref(null)
+
 // initChartWithInitialCandles 밖에서도 사용할 수 있게 스코프 선언
 let updateAllSeries, activeSeries
 
-const {
-  chart,
-  candleSeries,
-  indicatorSeries,
-  initChart,
-  cleanup: cleanupChart,
-} = useChart(chartContainer, props)
+const { chart, initChart, cleanup: cleanupChart } = useChart(chartContainer, props)
 
 const {
   currentCandles,
@@ -71,10 +89,14 @@ const {
   updateIndicatorDiv, // ← 추가
 } = useChartUI(props)
 
+const isHovering = ref(false)
+const lastCandle = ref(null) // 마지막 캔들 정보를 저장할 ref 추가
+
 async function initChartWithInitialCandles() {
   const { chart: chartInstance, candleSeries: series } = initChart()
   if (!chartInstance || !series) return
-  ;({ updateAllSeries, activeSeries } = useIndicators(chartInstance, series, props))
+
+  candleSeries.value = series
 
   const initialCandles = await loadInitialCandlesFromBinance()
   currentCandles.value = [...initialCandles].sort((a, b) => a.time - b.time)
@@ -84,9 +106,9 @@ async function initChartWithInitialCandles() {
 
   if (currentCandles.value.length) {
     currentPrice.value = currentCandles.value.slice(-1)[0].close
-    updateDataDivWithCandle(currentCandles.value.slice(-1)[0])
+    lastCandle.value = currentCandles.value.slice(-1)[0] // 초기 마지막 캔들 설정
+    updateDataDivWithCandle(lastCandle.value)
   }
-  updateAllSeries(currentCandles.value)
 
   chartInstance.timeScale().subscribeVisibleTimeRangeChange(async () => {
     if (!chartInstance || isLoading.value) return
@@ -109,75 +131,29 @@ async function initChartWithInitialCandles() {
         )
         series.setData(currentCandles.value)
         oldestTime.value = currentCandles.value[0].time
-        updateAllSeries(currentCandles.value)
       }
     }
   })
 
+  // 크로스헤어 이동 감지
   chartInstance.subscribeCrosshairMove((param) => {
     if (!dataDiv.value) return
 
-    // console.log('hello', param)
-    // 캔들 평소 동작
+    // 마우스가 차트를 벗어났거나 크로스헤어가 없을 때
     if (!param || param.time === null) {
-      updateDataDivWithCandle(currentCandles.value.slice(-1)[0])
-      // 지표도 마지막 값으로 업데이트
-
-      const lastMap =
-        {} +
-        props.indicators.forEach((key) => {
-          if (key === 'macd') {
-            const hS = activeSeries.macdHist
-            const lS = activeSeries.macdLine
-            const sS = activeSeries.macdSignal
-
-            const hV = hS && param.seriesData.get(hS)?.value
-            const lV = lS && param.seriesData.get(lS)?.value
-            const sV = sS && param.seriesData.get(sS)?.value
-
-            valuesMap.macd = {
-              hist: hV ?? null,
-              macd: lV ?? null,
-              signal: sV ?? null,
-            }
-          } else {
-            const s = activeSeries[key]
-            const p = s && param.seriesData.get(s)
-            valuesMap[key] = p?.value ?? null
-          }
-        })
-      updateIndicatorDiv(lastMap)
+      isHovering.value = false
+      updateDataDivWithCandle(lastCandle.value) // 마지막 캔들 정보 표시
       return
     }
 
     // 마우스 위치의 캔들
     const candle = param.seriesData.get(series)
     if (candle) {
-      updateDataDivWithCandle(candle)
-      // 지표 값도 함께 뽑아서 업데이트
-      const valuesMap = {}
-      props.indicators.forEach((key) => {
-        if (key === 'macd') {
-          const hS = activeSeries.macdHist
-          const lS = activeSeries.macdLine
-          const sS = activeSeries.macdSignal
-
-          const hV = hS && param.seriesData.get(hS)?.value
-          const lV = lS && param.seriesData.get(lS)?.value
-          const sV = sS && param.seriesData.get(sS)?.value
-
-          valuesMap.macd = {
-            hist: hV ?? null,
-            macd: lV ?? null,
-            signal: sV ?? null,
-          }
-        } else {
-          const s = activeSeries[key]
-          const p = s && param.seriesData.get(s)
-          valuesMap[key] = p?.value ?? null
-        }
-      })
-      updateIndicatorDiv(valuesMap)
+      isHovering.value = true
+      updateDataDivWithCandle(candle) // 호버한 캔들 정보 표시
+    } else {
+      isHovering.value = false
+      updateDataDivWithCandle(lastCandle.value) // 마지막 캔들 정보 표시
     }
   })
 }
@@ -187,12 +163,22 @@ function handleWebSocketMessage(candle) {
   currentPrice.value = candle.close
 
   const idx = currentCandles.value.findIndex((c) => c.time === candle.time)
-  if (idx >= 0) currentCandles.value[idx] = candle
-  else currentCandles.value.push(candle)
-  currentCandles.value.sort((a, b) => a.time - b.time)
-  candleSeries.value.setData(currentCandles.value)
-  updateDataDivWithCandle(candle)
-  updateAllSeries(currentCandles.value)
+  if (idx >= 0) {
+    currentCandles.value[idx] = candle
+    candleSeries.value?.update(candle)
+  } else {
+    currentCandles.value.push(candle)
+    currentCandles.value.sort((a, b) => a.time - b.time)
+    candleSeries.value?.update(candle)
+  }
+
+  // 마지막 캔들 정보 업데이트
+  lastCandle.value = candle
+
+  // 호버 중이 아닐 때만 업데이트
+  if (!isHovering.value) {
+    updateDataDivWithCandle(candle)
+  }
 }
 
 function cleanup() {
@@ -201,68 +187,11 @@ function cleanup() {
 }
 
 onMounted(async () => {
+  isLoadingSpinner.value = true
   await initChartWithInitialCandles()
   connectWebSocket(handleWebSocketMessage)
+  isLoadingSpinner.value = false
 })
-
-// ① props.indicators 변경 감지 → 즉시 렌더
-watch(
-  () => props.indicators,
-  (newList, oldList) => {
-    // updateAllSeries가 아직 할당되지 않았으면 아무 것도 안 함
-    if (typeof updateAllSeries !== 'function') return
-
-    // 1) 차트 위 지표 라인들 업데이트/생성/삭제
-    updateAllSeries(currentCandles.value)
-
-    // 2) UI 영역에도 마지막 지표 값 바로 보여주기
-    /* … */
-  },
-  {
-    deep: true,
-    immediate: false, // 또는 immediate를 false로 변경
-  },
-)
-
-// props.indicators가 변경될 때마다 indicatorDiv 강제 갱신
-watch(
-  () => props.indicators,
-  (newInds) => {
-    if (!indicatorDiv.value) return
-
-    // 1) 지표가 하나도 없으면 즉시 비우기
-    if (newInds.length === 0) {
-      indicatorDiv.value.innerHTML = ''
-      return
-    }
-
-    // 2) 남은 지표만 다시 렌더링
-    const lastMap = {}
-    newInds.forEach((key) => {
-      if (key === 'macd') {
-        const hS = activeSeries.macdHist
-        const lS = activeSeries.macdLine
-        const sS = activeSeries.macdSignal
-
-        const hV = hS && param.seriesData.get(hS)?.value
-        const lV = lS && param.seriesData.get(lS)?.value
-        const sV = sS && param.seriesData.get(sS)?.value
-
-        valuesMap.macd = {
-          hist: hV ?? null,
-          macd: lV ?? null,
-          signal: sV ?? null,
-        }
-      } else {
-        const s = activeSeries[key]
-        const p = s && param.seriesData.get(s)
-        valuesMap[key] = p?.value ?? null
-      }
-    })
-    updateIndicatorDiv(lastMap)
-  },
-  { deep: true, immediate: true },
-)
 
 onBeforeUnmount(() => cleanup())
 </script>

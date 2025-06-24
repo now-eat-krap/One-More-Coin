@@ -1,12 +1,10 @@
 // src/composables/useChartUI.js
 import { ref, computed } from 'vue'
-import { mapIndicators } from '@/composables/useIndicators' // 지표 메타정보 가져오기
 
 export function useChartUI(props) {
   const currentPrice = ref(null)
   const previousPrice = ref(null)
   const dataDiv = ref(null)
-  const indicatorDiv = ref(null)
 
   const formattedPrice = computed(() => {
     if (currentPrice.value === null) return ''
@@ -24,7 +22,7 @@ export function useChartUI(props) {
   /**
    * 차트 아래 데이터 영역 업데이트
    */
-  function updateDataDivWithCandle(candle, indicatorValue = null) {
+  function updateDataDivWithCandle(candle) {
     if (!dataDiv.value || !candle) return
 
     // 서울 시간대 보정
@@ -56,64 +54,12 @@ export function useChartUI(props) {
     `
   }
 
-  /**
-   * 지표 영역 업데이트
-   * @param {{ [key: string]: number|null }} valuesMap  // { ma: 1234.56, ema: 1230.12, macd: -0.45, ... }
-   */
-  function updateIndicatorDiv(valuesMap) {
-    if (!indicatorDiv.value) return
-    indicatorDiv.value.innerHTML = ''
-
-    props.indicators.forEach((key) => {
-      const cfg = mapIndicators[key]
-      const raw = valuesMap[key]
-      if (raw == null) return
-
-      // ① MACD composite
-      if (key === 'macd' && typeof raw === 'object') {
-        const items = [
-          { label: 'Hist', value: raw.hist, color: cfg.color },
-          { label: 'MACD', value: raw.macd, color: cfg.color },
-          { label: 'Signal', value: raw.signal, color: cfg.color },
-        ]
-        const el = document.createElement('div')
-        el.className = `indicator-item pane-${cfg.paneIndex}`
-        el.innerHTML = `<span class="text-gray-400 font-medium">
-              MACD : 
-            </span>`
-
-        items.forEach((item) => {
-          console.log(item.color)
-          el.innerHTML += `
-            <span>${item.value != null ? item.value.toFixed(2) : '-'}</span>
-          `
-          indicatorDiv.value.appendChild(el)
-        })
-        return
-      }
-
-      // ② all other simple indicators
-      const display = raw != null ? raw.toFixed(2) : '-'
-      const el = document.createElement('div')
-      el.className = `indicator-item pane-${cfg.paneIndex}`
-      el.innerHTML = `
-        <span class="text-${cfg.color}-400 font-medium">
-          ${cfg.name}:
-        </span>
-        <span>${display}</span>
-      `
-      indicatorDiv.value.appendChild(el)
-    })
-  }
-
   return {
     currentPrice,
     previousPrice,
     dataDiv,
-    indicatorDiv,
     formattedPrice,
     priceColorClass,
     updateDataDivWithCandle,
-    updateIndicatorDiv,
   }
 }

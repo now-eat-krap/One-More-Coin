@@ -1,7 +1,7 @@
 <!-- src/views/RealTimeView.vue -->
 <template>
   <!-- 최상위: 화면 전체 높이, 세로 레이아웃 -->
-  <div class="flex flex-col h-screen">
+  <div class="flex flex-col h-screen overflow-hidden">
     <!-- 헤더 (고정 높이) -->
     <div class="flex-none p-2 border-b border-gray-700">
       <div class="flex items-center space-x-6">
@@ -38,6 +38,7 @@
             <option value="15m">15분</option>
             <option value="1h">1시간</option>
             <option value="4h">4시간</option>
+            <option value="1d">1일</option>
             <option value="1w">1주</option>
             <option value="1M">1개월</option>
           </select>
@@ -54,32 +55,6 @@
               />
             </svg>
           </div>
-        </div>
-
-        <!-- 지표 선택 버튼 -->
-        <div class="relative">
-          <button
-            @click="showIndicatorModal = true"
-            class="flex items-center space-x-2 px-4 py-2 text-white rounded-lg hover:bg-gray-700/50 transition-colors duration-200"
-          >
-            <span class="font-medium">
-              지표<span v-if="chartSettings.indicators.length">
-                ({{ chartSettings.indicators.length }})</span
-              >
-            </span>
-          </button>
-        </div>
-
-        <!-- 선택된 지표 태그들 -->
-        <div class="mt-2 flex flex-wrap space-x-2">
-          <span
-            v-for="(id, index) in chartSettings.indicators"
-            :key="`${id}-${index}`"
-            class="bg-gray-700 text-white px-2 py-1 rounded flex items-center space-x-1"
-          >
-            <span>{{ indicatorsMap[id].name }}</span>
-            <button @click="removeIndicator(index)" class="hover:text-red-400">&times;</button>
-          </span>
         </div>
       </div>
     </div>
@@ -153,95 +128,36 @@
         </div>
       </div>
     </div>
-
-    <!-- 지표 선택 모달 -->
-    <div
-      v-if="showIndicatorModal"
-      class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
-    >
-      <div class="bg-gray-800 p-6 rounded-xl w-[600px] border border-gray-700">
-        <div class="flex justify-between items-center mb-6">
-          <h3 class="text-xl font-semibold text-white">지표 선택</h3>
-          <button
-            @click="showIndicatorModal = false"
-            class="text-gray-400 hover:text-white transition-colors"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-        <div class="relative mb-4">
-          <input
-            v-model="indicatorSearchQuery"
-            type="text"
-            placeholder="지표 검색..."
-            class="w-full px-4 py-2 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-600"
-          />
-          <div class="absolute inset-y-0 right-0 flex items-center pr-3">
-            <svg
-              class="w-5 h-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-              />
-            </svg>
-          </div>
-        </div>
-        <div
-          class="max-h-[400px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-700 [&::-webkit-scrollbar-thumb]:bg-gray-600 [&::-webkit-scrollbar-thumb:hover]:bg-gray-500"
-        >
-          <div
-            v-for="indicator in filteredIndicators"
-            :key="indicator.id"
-            @click="selectIndicator(indicator.id)"
-            class="p-3 flex items-center justify-between hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer rounded-lg"
-          >
-            <div class="flex items-center space-x-3">
-              <div>
-                <span class="font-medium text-white">{{ indicator.name }}</span>
-                <div class="text-gray-400 text-sm">{{ indicator.description }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- 본문: 헤더 아래 남은 공간을 차지, 스크롤 없이 꽉 채움 -->
-    <div class="flex-1 flex flex-row">
+    <div class="flex-1 flex flex-row min-h-0">
       <!-- 좌측 4/5 -->
-      <div class="flex flex-col w-3/4 h-full">
-        <!-- 상단 차트 영역 -->
-        <div class="flex-1 border-3 border-gray-700">
+      <div class="flex flex-col w-3/4 h-full min-h-0">
+        <!-- 상단 차트 영역: 남은 공간의 절반 -->
+        <div class="flex-1 border border-gray-700">
           <div class="real-time-container h-full">
-            <LiveChart
-              :key="`${chartSettings.symbol}-${chartSettings.interval}-${chartSettings.exchange}`"
-              :symbol="chartSettings.symbol"
-              :interval="chartSettings.interval"
-              :exchange="chartSettings.exchange.toLowerCase()"
-              :indicators="chartSettings.indicators"
-            />
+            <template v-if="backtestResults">
+              <BacktestChart
+                :key="`backtest-${chartSettings.symbol}-${chartSettings.interval}`"
+                :results="backtestResults"
+              />
+            </template>
+            <template v-else>
+              <LiveChart
+                :key="`${chartSettings.symbol}-${chartSettings.interval}-${chartSettings.exchange}`"
+                :symbol="chartSettings.symbol"
+                :interval="chartSettings.interval"
+                :exchange="chartSettings.exchange.toLowerCase()"
+              />
+            </template>
           </div>
         </div>
-        <!-- 하단 백테스트 영역: 높이 동일하게 분할하지 않고 필요에 따라 조정 -->
-        <div class="border-3 border-gray-700 h-1/2 p-4">
+
+        <!-- 하단 백테스트 영역: 남은 공간의 절반, 내부 스크롤 -->
+        <div class="flex-1 border border-gray-700 p-4 overflow-auto">
           <BacktestConfig
             :symbol="chartSettings.symbol"
             :exchange="chartSettings.exchange"
             :interval="chartSettings.interval"
-            :indicators="chartSettings.indicators"
             :strategy="currentStrategy"
             @backtest-complete="handleBacktestComplete"
           />
@@ -249,9 +165,8 @@
       </div>
 
       <!-- 우측 1/5 -->
-      <div class="border-3 border-gray-700 w-1/4 h-full">
-        <RecommendedStrategies
-          :selected-indicators="chartSettings.indicators"
+      <div class="border border-gray-700 w-1/4 h-full">
+        <SelectStrategies
           @select-strategy="handleStrategySelect"
           @save-strategy="handleSaveStrategy"
         />
@@ -261,10 +176,11 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import LiveChart from '@/components/chart/LiveChart.vue'
 import BacktestConfig from '@/components/backtest/BacktestConfig.vue'
-import RecommendedStrategies from '@/components/backtest/RecommendedStrategies.vue'
+import SelectStrategies from '@/components/backtest/SelectStrategies.vue'
+import BacktestChart from '@/components/chart/BacktestChart.vue'
 import axios from 'axios'
 
 // 로컬스토리지 키
@@ -272,15 +188,13 @@ const STORAGE_KEYS = {
   SYMBOL: 'omc_selectedSymbol',
   EXCHANGE: 'omc_selectedExchange',
   INTERVAL: 'omc_selectedInterval',
-  INDICATORS: 'omc_selectedIndicators',
 }
 
 // 차트 설정 상태
 const chartSettings = ref({
   symbol: localStorage.getItem(STORAGE_KEYS.SYMBOL) || 'btcusdt',
-  exchange: localStorage.getItem(STORAGE_KEYS.EXCHANGE) || 'Binance',
+  exchange: localStorage.getItem(STORAGE_KEYS.EXCHANGE) || 'binance',
   interval: localStorage.getItem(STORAGE_KEYS.INTERVAL) || '1m',
-  indicators: JSON.parse(localStorage.getItem(STORAGE_KEYS.INDICATORS) || '[]'),
 })
 
 // 선택된 코인 정보
@@ -292,46 +206,12 @@ const selectedCoin = computed(() => ({
 
 // 모달 / 검색 상태
 const showSymbolModal = ref(false)
-const showIndicatorModal = ref(false)
 const searchQuery = ref('')
-const indicatorSearchQuery = ref('')
 
 // 데이터 배열
 const coins = [
   { symbol: 'btcusdt', name: 'Bitcoin', exchange: 'Binance' },
   { symbol: '추가 예정', name: '조금만 기다려주세요...', exchange: 'One-More-Coin' },
-]
-
-const indicators = [
-  {
-    id: 'ma',
-    name: '이동평균선 (MA)',
-    description: '단순 이동평균선',
-    category: '추세',
-    params: ['period'],
-  },
-  {
-    id: 'ema',
-    name: '지수이동평균선 (EMA)',
-    description: '지수 이동평균선',
-    category: '추세',
-    params: ['period'],
-  },
-  { id: 'rsi', name: 'RSI', description: '상대강도지수', category: '모멘텀', params: ['period'] },
-  {
-    id: 'macd',
-    name: 'MACD',
-    description: '이동평균수렴확산지수',
-    category: '모멘텀',
-    params: ['fastPeriod', 'slowPeriod', 'signalPeriod'],
-  },
-  {
-    id: 'bollinger',
-    name: '볼린저 밴드',
-    description: '볼린저 밴드',
-    category: '변동성',
-    params: ['period', 'stdDev'],
-  },
 ]
 
 // 검색 필터
@@ -345,19 +225,6 @@ const filteredCoins = computed(() => {
   )
 })
 
-const filteredIndicators = computed(() => {
-  const q = indicatorSearchQuery.value.toLowerCase()
-  return indicators.filter(
-    (i) =>
-      i.name.toLowerCase().includes(q) ||
-      i.description.toLowerCase().includes(q) ||
-      i.category.toLowerCase().includes(q),
-  )
-})
-
-// 인디케이터 이름 빠른조회용 맵
-const indicatorsMap = Object.fromEntries(indicators.map((i) => [i.id, i]))
-
 // localStorage 동기화
 watch(
   chartSettings,
@@ -365,7 +232,7 @@ watch(
     localStorage.setItem(STORAGE_KEYS.SYMBOL, newSettings.symbol)
     localStorage.setItem(STORAGE_KEYS.EXCHANGE, newSettings.exchange)
     localStorage.setItem(STORAGE_KEYS.INTERVAL, newSettings.interval)
-    localStorage.setItem(STORAGE_KEYS.INDICATORS, JSON.stringify(newSettings.indicators))
+    backtestResults.value = null
   },
   { deep: true },
 )
@@ -378,21 +245,16 @@ function selectSymbol(coin) {
   searchQuery.value = ''
 }
 
-function selectIndicator(id) {
-  chartSettings.value.indicators.push(id)
-  localStorage.setItem(STORAGE_KEYS.INDICATORS, JSON.stringify(chartSettings.value.indicators))
-  showIndicatorModal.value = false
-  indicatorSearchQuery.value = ''
-}
-
-function removeIndicator(index) {
-  chartSettings.value.indicators.splice(index, 1)
-  localStorage.setItem(STORAGE_KEYS.INDICATORS, JSON.stringify(chartSettings.value.indicators))
-}
+// 백테스트 결과 상태 추가
+const backtestResults = ref(null)
 
 // 백테스트, 전략 핸들러
 function handleBacktestComplete(results) {
   console.log('Backtest results:', results)
+  backtestResults.value = null
+  nextTick(() => {
+    backtestResults.value = results
+  })
 }
 
 function handleStrategySelect(strategyId) {
