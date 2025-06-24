@@ -110,6 +110,7 @@
             v-model="indicatorCompare.operator"
             class="w-full bg-gray-700 text-white rounded-lg px-3 py-2.5 border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
           >
+            <option value="">연산자 선택</option>
             <option v-for="option in operatorOptions" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
@@ -151,13 +152,15 @@ const operatorOptions = ref([
   { value: '>=', label: '이상 (>=)' },
   { value: '<=', label: '이하 (<=)' },
   { value: '==', label: '같음 (=)' },
+  { value: 'crossover', label: '크로스오버 (골든크로스)' },
+  { value: 'crossunder', label: '크로스언더 (데드크로스)' },
 ])
 
 // 지표 간 비교 관련 상태
 const indicatorCompare = ref({
   firstIndicator: '',
   secondIndicator: '',
-  operator: '>',
+  operator: '',
 })
 
 // 첫 번째 지표의 파라미터 값
@@ -209,6 +212,13 @@ const handleSecondIndicatorChange = () => {
 
 // 지표 간 비교 저장
 const saveIndicatorCompare = () => {
+  const { firstIndicator, secondIndicator, operator } = indicatorCompare.value
+  // null·undefined·'' 인 값이 하나라도 있으면
+  if ([firstIndicator, secondIndicator, operator].some((v) => v == null || v === '')) {
+    alert('값을 선택해주세요')
+    return
+  }
+
   const condition = {
     type: 'indicator_compare',
     params: {
@@ -228,7 +238,7 @@ const saveIndicatorCompare = () => {
   indicatorCompare.value = {
     firstIndicator: '',
     secondIndicator: '',
-    operator: '>',
+    operator: '',
   }
   firstIndicatorParams.value = {}
   secondIndicatorParams.value = {}

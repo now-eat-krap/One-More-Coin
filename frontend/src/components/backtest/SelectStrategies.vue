@@ -4,8 +4,8 @@
     <div
       class="text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700"
     >
-      <ul class="flex flex-wrap -mb-px">
-        <li class="me-2">
+      <ul class="flex flex-nowrap overflow-x-auto -mb-px">
+        <!-- <li class="me-2">
           <a
             href="#"
             @click.prevent="activeTab = 'recommended'"
@@ -18,7 +18,7 @@
           >
             추천 전략
           </a>
-        </li>
+        </li> -->
         <li class="me-2">
           <a
             href="#"
@@ -59,6 +59,20 @@
             ]"
           >
             가격 조건
+          </a>
+        </li>
+        <li class="me-2">
+          <a
+            href="#"
+            @click.prevent="activeTab = 'candle_pattern'"
+            :class="[
+              'inline-block p-4 border-b-2 rounded-t-lg',
+              activeTab === 'candle_pattern'
+                ? 'text-blue-600 border-blue-600 dark:text-blue-500 dark:border-blue-500'
+                : 'border-transparent hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300',
+            ]"
+          >
+            캔들 패턴
           </a>
         </li>
       </ul>
@@ -139,6 +153,9 @@
     <!-- 가격 조건 탭 -->
     <PriceConditionTab v-if="activeTab === 'price'" />
 
+    <!-- 캔들 패턴 탭 -->
+    <CandlePatternTab v-if="activeTab === 'candle_pattern'" />
+
     <!-- 전략 상세 모달 -->
     <StrategyDetailModal
       :show="showModal"
@@ -155,12 +172,13 @@ import StrategyDetailModal from './StrategyDetailModal.vue'
 import IndicatorConditionTab from './tabs/IndicatorConditionTab.vue'
 import IndicatorCompareTab from './tabs/IndicatorCompareTab.vue'
 import PriceConditionTab from './tabs/PriceConditionTab.vue'
+import CandlePatternTab from './tabs/CandlePatternTab.vue'
 import { useStrategyStore } from '@/stores/strategyStore'
 
 const strategyStore = useStrategyStore()
 const showModal = ref(false)
 const selectedStrategyId = ref('')
-const activeTab = ref('recommended')
+const activeTab = ref('indicator')
 
 const showStrategyDetail = (strategyId) => {
   selectedStrategyId.value = strategyId
@@ -175,75 +193,91 @@ const closeModal = () => {
 const tryStrategy = (strategyId) => {
   const strategy = {
     buy: [],
-    sell: []
+    sell: [],
   }
 
   switch (strategyId) {
     case 'ma_crossover':
-      strategy.buy = [{
-        type: 'ma_crossover',
-        params: {
-          shortPeriod: 20,
-          longPeriod: 50
-        }
-      }]
-      strategy.sell = [{
-        type: 'ma_crossover',
-        params: {
-          shortPeriod: 20,
-          longPeriod: 50
-        }
-      }]
+      strategy.buy = [
+        {
+          type: 'ma_crossover',
+          params: {
+            shortPeriod: 20,
+            longPeriod: 50,
+          },
+        },
+      ]
+      strategy.sell = [
+        {
+          type: 'ma_crossover',
+          params: {
+            shortPeriod: 20,
+            longPeriod: 50,
+          },
+        },
+      ]
       break
     case 'rsi':
-      strategy.buy = [{
-        type: 'rsi',
-        params: {
-          period: 14,
-          oversold: 30
-        }
-      }]
-      strategy.sell = [{
-        type: 'rsi',
-        params: {
-          period: 14,
-          overbought: 70
-        }
-      }]
+      strategy.buy = [
+        {
+          type: 'rsi',
+          params: {
+            period: 14,
+            oversold: 30,
+          },
+        },
+      ]
+      strategy.sell = [
+        {
+          type: 'rsi',
+          params: {
+            period: 14,
+            overbought: 70,
+          },
+        },
+      ]
       break
     case 'bollinger':
-      strategy.buy = [{
-        type: 'bollinger',
-        params: {
-          period: 20,
-          stdDev: 2
-        }
-      }]
-      strategy.sell = [{
-        type: 'bollinger',
-        params: {
-          period: 20,
-          stdDev: 2
-        }
-      }]
+      strategy.buy = [
+        {
+          type: 'bollinger',
+          params: {
+            period: 20,
+            stdDev: 2,
+          },
+        },
+      ]
+      strategy.sell = [
+        {
+          type: 'bollinger',
+          params: {
+            period: 20,
+            stdDev: 2,
+          },
+        },
+      ]
       break
     case 'macd':
-      strategy.buy = [{
-        type: 'macd',
-        params: {
-          fastPeriod: 12,
-          slowPeriod: 26,
-          signalPeriod: 9
-        }
-      }]
-      strategy.sell = [{
-        type: 'macd',
-        params: {
-          fastPeriod: 12,
-          slowPeriod: 26,
-          signalPeriod: 9
-        }
-      }]
+      strategy.buy = [
+        {
+          type: 'macd',
+          params: {
+            fastPeriod: 12,
+            slowPeriod: 26,
+            signalPeriod: 9,
+          },
+        },
+      ]
+      strategy.sell = [
+        {
+          type: 'macd',
+          params: {
+            fastPeriod: 12,
+            slowPeriod: 26,
+            signalPeriod: 9,
+          },
+        },
+      ]
       break
   }
 

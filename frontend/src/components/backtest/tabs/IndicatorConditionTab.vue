@@ -38,6 +38,7 @@
             @change="handleIndicatorChange"
             class="w-full bg-gray-700 text-white rounded-lg px-3 py-2.5 border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
           >
+            <option value="">지표 선택</option>
             <option v-for="option in indicatorOptions" :key="option.value" :value="option.value">
               {{ option.label }}
             </option>
@@ -69,6 +70,7 @@
               v-model="indicatorCondition.operator"
               class="w-full bg-gray-700 text-white rounded-lg px-3 py-2.5 border border-gray-600 focus:ring-blue-500 focus:border-blue-500"
             >
+              <option value="">연산자 선택</option>
               <option v-for="option in operatorOptions" :key="option.value" :value="option.value">
                 {{ option.label }}
               </option>
@@ -111,19 +113,21 @@ const indicatorOptions = ref([
   { value: 'macd', label: 'MACD' },
   { value: 'ema', label: 'EMA' },
   { value: 'sma', label: 'SMA' },
-  { value: 'bollinger', label: '볼린저 밴드' },
-  { value: 'stoch', label: '스토캐스틱' },
-  { value: 'atr', label: 'ATR' },
-  { value: 'cci', label: 'CCI' },
+  // { value: 'bollinger', label: '볼린저 밴드' },
+  // { value: 'stoch', label: '스토캐스틱' },
+  // { value: 'atr', label: 'ATR' },
+  // { value: 'cci', label: 'CCI' },
 ])
 
 // 연산자 옵션
 const operatorOptions = ref([
-  { value: '>', label: '초과' },
-  { value: '<', label: '미만' },
-  { value: '>=', label: '이상' },
-  { value: '<=', label: '이하' },
-  { value: '==', label: '같음' },
+  { value: '>', label: '초과 (>)' },
+  { value: '<', label: '미만 (<)' },
+  { value: '>=', label: '이상 (>=)' },
+  { value: '<=', label: '이하 (<=)' },
+  { value: '==', label: '같음 (=)' },
+  { value: 'crossover', label: '크로스오버 (골든크로스)' },
+  { value: 'crossunder', label: '크로스언더 (데드크로스)' },
 ])
 
 // 지표 조건 관련 상태
@@ -155,11 +159,10 @@ const handleIndicatorChange = () => {
 
 // 지표 조건 저장
 const saveIndicatorCondition = () => {
-  if (
-    !indicatorCondition.value.indicator ||
-    !indicatorCondition.value.operator ||
-    !indicatorCondition.value.target
-  ) {
+  const { indicator, operator, target } = indicatorCondition.value
+
+  // null·undefined·'' 인 값이 하나라도 있으면
+  if ([indicator, operator, target].some((v) => v == null || v === '')) {
     alert('값을 선택해주세요')
     return
   }
@@ -167,10 +170,10 @@ const saveIndicatorCondition = () => {
   const condition = {
     type: 'indicator',
     params: {
-      indicator: indicatorCondition.value.indicator,
+      indicator: [indicatorCondition.value.indicator],
       operator: indicatorCondition.value.operator,
+      settings: [{ ...paramValues.value }],
       oversold: Number(indicatorCondition.value.target),
-      settings: { ...paramValues.value },
     },
   }
 

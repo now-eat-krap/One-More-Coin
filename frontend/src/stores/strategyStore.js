@@ -4,7 +4,30 @@ import { useStorage } from '@vueuse/core'
 export const useStrategyStore = defineStore('strategy', {
   state: () => ({
     buyConditions: useStorage('strategy-buy-conditions', []),
-    sellConditions: useStorage('strategy-sell-conditions', [])
+    sellConditions: useStorage('strategy-sell-conditions', []),
+    backtestPeriod: useStorage('backtest-period', {
+      startDate: '',
+      endDate: '',
+    }),
+    advancedSettings: useStorage('advanced-settings', {
+      initialCapital: 1000000,
+      baseCurrency: '기본설정',
+      orderSize: 100,
+      orderSizeUnit: '%',
+      pyramiding: 1,
+      pyramidingUnit: '오더',
+      commission: 0,
+      commissionUnit: '%',
+      limitOrderPriceVerification: 0,
+      slippage: 0,
+      longPositionMargin: 0,
+      shortPositionMargin: 0,
+      recalculateAfterOrder: false,
+      recalculatePerTick: false,
+      useBarMagnifier: false,
+      atClosePrice: false,
+      useStandardOHLC: false,
+    }),
   }),
 
   actions: {
@@ -35,6 +58,14 @@ export const useStrategyStore = defineStore('strategy', {
     clearConditions() {
       this.buyConditions = []
       this.sellConditions = []
-    }
-  }
+    },
+
+    setBacktestPeriod(period) {
+      this.backtestPeriod = period
+    },
+
+    setAdvancedSettings(settings) {
+      this.advancedSettings = settings
+    },
+  },
 })

@@ -52,7 +52,7 @@ export function useCandleData(props) {
     const endpoint = `wss://stream.binance.com:9443/ws/${props.symbol}@kline_${props.interval}`
     ws.value = new WebSocket(endpoint)
     const offsetMs = new Date().getTimezoneOffset() * 60 * 1000
-    
+
     ws.value.onmessage = (e) => {
       try {
         const { k } = JSON.parse(e.data)
@@ -81,6 +81,6 @@ export function useCandleData(props) {
     loadInitialCandlesFromBinance,
     loadOlderCandlesFromTimescale,
     connectWebSocket,
-    cleanup
+    cleanup,
   }
-} 
+}

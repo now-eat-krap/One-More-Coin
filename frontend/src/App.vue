@@ -4,7 +4,7 @@
     <HeaderComponent v-if="route.path !== '/chart'" />
 
     <!-- 메인 컨텐츠 (고정 폭이 아니라 유연하게 늘어남) -->
-    <main class="flex-1">
+    <main>
       <RouterView />
     </main>
 
