@@ -1,1 +1,21 @@
 @import 'tailwindcss';
+
+.driver-popover {
+  max-width: 450px !important;
+  font-size: 16px !important;
+  padding: 20px !important;
+}
+
+.driver-popover-title {
+  font-size: 20px !important;
+  font-weight: bold;
+}
+
+.driver-popover-description {
+  font-size: 16px !important;
+}
+
+.driver-popover-footer button {
+  font-size: 14px !important;
+  padding: 5px 10px !important;
+}
