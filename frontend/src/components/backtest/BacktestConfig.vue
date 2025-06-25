@@ -101,60 +101,42 @@
       <div class="mb-4">
         <div class="flex items-center justify-between">
           <h4 class="text-lg font-medium text-white">백테스팅 기간</h4>
+
           <div class="flex items-center gap-4">
             <!-- Advanced Settings Button -->
             <button
+              id="step5"
               @click="showAdvancedSettingsModal = true"
               class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
             >
               고급설정
             </button>
-            <div class="relative">
-              <label class="block text-gray-300 text-sm mb-1">시작일</label>
+            <div id="step4" class="flex gap-4">
               <div class="relative">
-                <input
-                  v-model="strategyStore.backtestPeriod.startDate"
-                  type="date"
-                  class="w-40 pl-10 pr-3 py-1.5 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none"
-                  :max="strategyStore.backtestPeriod.endDate"
-                />
-                <svg
-                  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                <label class="block text-gray-300 text-sm mb-1">시작일</label>
+                <div class="relative w-40">
+                  <DatePicker
+                    v-model="rawStartDate"
+                    dateFormat="yy-mm-dd"
+                    showIcon
+                    fluid
+                    iconDisplay="input"
+                    :maxDate="new Date(rawEndDate) || new Date()"
                   />
-                </svg>
+                </div>
               </div>
-            </div>
-            <div class="relative">
-              <label class="block text-gray-300 text-sm mb-1">종료일</label>
               <div class="relative">
-                <input
-                  v-model="strategyStore.backtestPeriod.endDate"
-                  type="date"
-                  class="w-40 pl-10 pr-3 py-1.5 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none"
-                  :min="strategyStore.backtestPeriod.startDate"
-                />
-                <svg
-                  class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                    stroke-width="2"
-                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                <label class="block text-gray-300 text-sm mb-1">종료일</label>
+                <div class="relative w-40">
+                  <DatePicker
+                    v-model="rawEndDate"
+                    dateFormat="yy-mm-dd"
+                    showIcon
+                    fluid
+                    iconDisplay="input"
+                    :minDate="new Date(rawStartDate)"
                   />
-                </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -505,6 +487,7 @@
       </div>
       <!-- 백테스팅 실행 버튼 -->
       <button
+        id="step6"
         @click="runBacktest"
         class="mt-auto px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         :disabled="!isBacktestReady"
@@ -898,6 +881,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import axios from 'axios'
 import { useStrategyStore } from '@/stores/strategyStore'
 import { candlestickPatterns } from '@/config/candlePatternParams'
+import DatePicker from 'primevue/datepicker'
 
 // 로딩 상태
 const isLoading = ref(false)
@@ -980,7 +964,7 @@ const runBacktest = async () => {
     advancedSettings: strategyStore.advancedSettings,
   }
 
-  console.log(JSON.stringify(data))
+  console.log(JSON.stringify(data.conditions))
 
   try {
     const response = await axios.post('http://localhost:8000/api/v1/backtest', data)
@@ -1222,30 +1206,30 @@ const calculateTradeMetrics = (data) => {
   }
 }
 
-const formatValue = (metric, key) => {
-  const item = metric[key]
-  if (item.value === undefined || item.value === null) return '-'
-  let sign = item.value > 0 ? '+' : ''
-  let suffix = ' USDT'
+// const formatValue = (metric, key) => {
+//   const item = metric[key]
+//   if (item.value === undefined || item.value === null) return '-'
+//   let sign = item.value > 0 ? '+' : ''
+//   let suffix = ' USDT'
 
-  if (
-    metric.name === '지불된 수수료' ||
-    metric.name === '총손실' ||
-    metric.name === '최대 자본 상승' ||
-    metric.name === '최대 자본 감소'
-  ) {
-    sign = ''
-  }
-  if (metric.name === '총수익' && item.value === 0) {
-    sign = ''
-  }
+//   if (
+//     metric.name === '지불된 수수료' ||
+//     metric.name === '총손실' ||
+//     metric.name === '최대 자본 상승' ||
+//     metric.name === '최대 자본 감소'
+//   ) {
+//     sign = ''
+//   }
+//   if (metric.name === '총수익' && item.value === 0) {
+//     sign = ''
+//   }
 
-  if (item.value === 0 && (metric.name === '총수익' || metric.name === '총손실')) {
-    return `0${suffix}`
-  }
+//   if (item.value === 0 && (metric.name === '총수익' || metric.name === '총손실')) {
+//     return `0${suffix}`
+//   }
 
-  return `${sign}${item.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${suffix}`
-}
+//   return `${sign}${item.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${suffix}`
+// }
 
 // 외부에 노출할 메서드들
 defineExpose({
@@ -1287,6 +1271,28 @@ const saveAdvancedSettings = () => {
 const activeTab = ref('전략')
 
 const tradeList = ref([])
+
+const rawStartDate = ref(strategyStore.backtestPeriod.startDate)
+
+watch(rawStartDate, (val) => {
+  if (val instanceof Date) {
+    const yyyy = val.getFullYear()
+    const mm = String(val.getMonth() + 1).padStart(2, '0')
+    const dd = String(val.getDate()).padStart(2, '0')
+    strategyStore.backtestPeriod.startDate = `${yyyy}-${mm}-${dd}`
+  }
+})
+
+const rawEndDate = ref(strategyStore.backtestPeriod.endDate)
+
+watch(rawEndDate, (val) => {
+  if (val instanceof Date) {
+    const yyyy = val.getFullYear()
+    const mm = String(val.getMonth() + 1).padStart(2, '0')
+    const dd = String(val.getDate()).padStart(2, '0')
+    strategyStore.backtestPeriod.endDate = `${yyyy}-${mm}-${dd}`
+  }
+})
 </script>
 
 <style scoped>

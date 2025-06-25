@@ -12,6 +12,7 @@
         <!-- 코인 심볼 선택 버튼 -->
         <div class="relative">
           <button
+            id="step1"
             @click="showSymbolModal = true"
             class="flex items-center space-x-2 px-4 py-2 text-white rounded-lg hover:bg-gray-700/50 transition-colors duration-200"
           >
@@ -30,6 +31,7 @@
         <!-- 시간 선택 드롭다운 -->
         <div class="relative">
           <select
+            id="step2"
             v-model="chartSettings.interval"
             class="px-4 py-2 text-white rounded-lg hover:bg-gray-700/50 transition-colors duration-200 cursor-pointer appearance-none pr-10 bg-no-repeat bg-[length:1em] bg-[right_0.75rem_center] bg-[url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=\\'http://www.w3.org/2000/svg\\' viewBox=\\'0 0 24 24\\' fill=\\'none\\' stroke=\\'white\\' stroke-width=\\'2\\' stroke-linecap=\\'round\\' stroke-linejoin=\\'round\\'%3e%3cpolyline points=\\'6 9 12 15 18 9\\'%3e%3c/polyline%3e%3c/svg%3e')]"
           >
@@ -181,7 +183,7 @@ import LiveChart from '@/components/chart/LiveChart.vue'
 import BacktestConfig from '@/components/backtest/BacktestConfig.vue'
 import SelectStrategies from '@/components/backtest/SelectStrategies.vue'
 import BacktestChart from '@/components/chart/BacktestChart.vue'
-import axios from 'axios'
+import { useTutorial } from '@/composables/useTutorial'
 
 // 로컬스토리지 키
 const STORAGE_KEYS = {
@@ -268,6 +270,15 @@ const handleSaveStrategy = (strategy) => {
   console.log('Strategy saved:', strategy)
   currentStrategy.value = strategy
 }
+
+const { start } = useTutorial()
+
+onMounted(async () => {
+  await nextTick()
+  setTimeout(() => {
+    start()
+  }, 300)
+})
 </script>
 
 <style scoped>

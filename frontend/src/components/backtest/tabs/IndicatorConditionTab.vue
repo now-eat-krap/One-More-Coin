@@ -3,7 +3,7 @@
     <h3 class="text-xl font-semibold text-white mb-4">지표 조건</h3>
 
     <!-- 매수/매도 조건 선택 -->
-    <div class="flex space-x-4 mb-6">
+    <div id="step3-2" class="flex space-x-4 mb-6">
       <button
         @click="activeCondition = 'buy'"
         :class="[
@@ -27,9 +27,29 @@
         매도 조건
       </button>
     </div>
-
+    <div
+      v-show="alert"
+      class="flex items-center p-4 mb-4 text-sm text-red-800 rounded-lg bg-red-50 dark:bg-gray-800 dark:text-red-400"
+      role="alert"
+    >
+      <svg
+        class="shrink-0 inline w-4 h-4 me-3"
+        aria-hidden="true"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+      >
+        <path
+          d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"
+        />
+      </svg>
+      <span class="sr-only">Info</span>
+      <div>
+        <span class="font-medium">조건을 전부 선택해 주세요</span>
+      </div>
+    </div>
     <!-- 지표 조건 설정 -->
-    <div class="bg-gray-800 rounded-lg p-6">
+    <div id="step3-3" class="bg-gray-800 rounded-lg p-6">
       <div class="space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-300 mb-2">지표 선택</label>
@@ -90,6 +110,7 @@
 
       <!-- 조건 저장 버튼 -->
       <button
+        id="step3-4"
         @click="saveIndicatorCondition"
         class="w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition-colors focus:ring-4 focus:ring-blue-800 mt-6"
       >
@@ -157,13 +178,14 @@ const handleIndicatorChange = () => {
   paramValues.value = { ...defaultParams[indicatorCondition.value.indicator] }
 }
 
-// 지표 조건 저장
+const alert = ref(false)
+// 지표 조건 저장ㄴ
 const saveIndicatorCondition = () => {
   const { indicator, operator, target } = indicatorCondition.value
 
   // null·undefined·'' 인 값이 하나라도 있으면
   if ([indicator, operator, target].some((v) => v == null || v === '')) {
-    alert('값을 선택해주세요')
+    alert.value = true
     return
   }
 
@@ -184,11 +206,11 @@ const saveIndicatorCondition = () => {
   }
 
   // 초기화
-  indicatorCondition.value = {
-    indicator: '',
-    operator: '',
-    target: '',
-  }
-  paramValues.value = {}
+  // indicatorCondition.value = {
+  //   indicator: '',
+  //   operator: '',
+  //   target: '',
+  // }
+  // paramValues.value = {}
 }
 </script>
