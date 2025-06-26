@@ -122,7 +122,20 @@
                     fluid
                     iconDisplay="input"
                     :maxDate="new Date(rawEndDate) || new Date()"
-                  />
+                    :minDate="new Date(startDate)"
+                  >
+                    <template #footer>
+                      <div class="mt-2">
+                        <!-- minDate 로 바로 점프 -->
+                        <Button
+                          class="w-full"
+                          label="마지막 날 선택"
+                          size="small"
+                          @click="rawStartDate = new Date(startDate)"
+                        ></Button>
+                      </div>
+                    </template>
+                  </DatePicker>
                 </div>
               </div>
               <div class="relative">
@@ -134,7 +147,8 @@
                     showIcon
                     fluid
                     iconDisplay="input"
-                    :minDate="new Date(rawStartDate)"
+                    :minDate="new Date(rawStartDate) || new Date(startDate)"
+                    :maxDate="new Date()"
                   />
                 </div>
               </div>
@@ -499,10 +513,10 @@
     <!-- 요약 탭 내용 -->
     <div
       v-else-if="activeTab === '요약'"
-      class="flex-1 flex flex-col items-center justify-center gap-6 overflow-y-auto font-light"
+      class="flex-1 flex flex-col items-center gap-6 overflow-y-auto font-light"
     >
       <div v-if="overview" class="grid grid-cols-1 md:grid-cols-4 gap-6 w-full max-w-10xl">
-        <div class="bg-gray-800 rounded-lg p-6 flex flex-col items-center shadow">
+        <div class="bg-gray-800 rounded-lg py-6 px-3 flex flex-col items-center shadow">
           <div class="text-gray-400 text-sm mb-2">총손익</div>
           <div>
             <span
@@ -882,6 +896,8 @@ import axios from 'axios'
 import { useStrategyStore } from '@/stores/strategyStore'
 import { candlestickPatterns } from '@/config/candlePatternParams'
 import DatePicker from 'primevue/datepicker'
+import Button from 'primevue/button'
+import { firstDate } from '@/constants/firstDate'
 
 // 로딩 상태
 const isLoading = ref(false)
@@ -952,6 +968,7 @@ const isBacktestReady = computed(() => {
 // 백테스팅 실행 함수
 const runBacktest = async () => {
   isLoading.value = true
+
   const data = {
     period: strategyStore.backtestPeriod,
     conditions: {
@@ -1272,7 +1289,17 @@ const activeTab = ref('전략')
 
 const tradeList = ref([])
 
-const rawStartDate = ref(strategyStore.backtestPeriod.startDate)
+const rawStartDate = ref(
+  strategyStore.backtestPeriod.startDate
+    ? new Date(strategyStore.backtestPeriod.startDate) // 🎯 유효 문자열이면 Date로
+    : new Date(),
+)
+
+/* ✅ 1. computed: 항상 최신 값 유지 */
+const startDate = computed(() => {
+  return firstDate[props.exchange.toUpperCase()]?.[props.symbol.toUpperCase()] ?? null
+  // 값이 없으면 null, 필요하면 '2010-01-01' 같은 기본값 지정
+})
 
 watch(rawStartDate, (val) => {
   if (val instanceof Date) {
@@ -1283,7 +1310,11 @@ watch(rawStartDate, (val) => {
   }
 })
 
-const rawEndDate = ref(strategyStore.backtestPeriod.endDate)
+const rawEndDate = ref(
+  strategyStore.backtestPeriod.endDate
+    ? new Date(strategyStore.backtestPeriod.endDate) // 🎯 유효 문자열이면 Date로
+    : new Date(),
+)
 
 watch(rawEndDate, (val) => {
   if (val instanceof Date) {
