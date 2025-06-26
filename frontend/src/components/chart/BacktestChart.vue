@@ -67,6 +67,8 @@ const indicatorSeries = {} // will hold series objects by name
 const indicatorPanes = {} // will hold pane indices by name
 const uniqueMap = new Map()
 
+let candleCount
+
 async function fetchCandleData() {
   try {
     if (!props.results?.period?.startDate || !props.results?.period?.endDate) {
@@ -88,8 +90,7 @@ async function fetchCandleData() {
     }
 
     const totalMs = endDate.getTime() - startDate.getTime()
-    const candleCount = Math.ceil(totalMs / intervalMs[props.results.interval])
-
+    candleCount = Math.ceil(totalMs / intervalMs[props.results.interval])
     const params = {
       exchange: props.results.exchange,
       symbol: props.results.symbol,
@@ -110,7 +111,7 @@ async function fetchCandleData() {
         }))
         .sort((a, b) => a.time - b.time)
 
-      const displayData = allCandleData.value.slice(999)
+      const displayData = allCandleData.value.slice(-candleCount - 1)
       candlestickSeries.setData(displayData)
 
       // set visible range
@@ -313,11 +314,16 @@ function updateIndicators(displayData) {
     if (name === 'rsi') {
       const period = params.settings[0].period
       const rsiVals = RSI.calculate({ values: closes, period })
-      const offset = 999 - period
-      const data = displayData.map((c, i) => ({
-        time: c.time,
-        value: rsiVals[i + offset],
-      }))
+      let data = []
+      const min = Math.min(displayData.length, rsiVals.length)
+
+      for (let i = 0; i < min; i++) {
+        const c = displayData[displayData.length - 1 - i] // 대응하는 displayData 요소
+        data.unshift({
+          time: c.time, // 시간
+          value: rsiVals[rsiVals.length - 1 - i], // RSI 값
+        })
+      }
       seriesObj.setData(data)
     } else if (name === 'macd') {
       const { fastPeriod, slowPeriod, signalPeriod } = params.settings[0]
@@ -330,30 +336,34 @@ function updateIndicators(displayData) {
         SimpleMASignal: false,
       }
       const macdRes = MACD.calculate(macdInput)
-      const startIdx = slowPeriod
-      const offset = 999 - startIdx
-      // MACD 라인
-      const macdData = displayData.map((c, i) => ({
-        time: c.time,
-        value: macdRes[i + offset].MACD,
-      }))
-      const signalData = displayData.map((c, i) => ({
-        time: c.time,
-        value: macdRes[i + offset].signal,
-      }))
+      const min = Math.min(displayData.length, macdRes.length)
+      let macdData = []
+      let histData = []
+      let signalData = []
 
-      // 히스토그램 + 색
-      const histData = displayData.map((c, i) => {
-        const idx = i + offset
-        const v = macdRes[idx].histogram
-        const prev = idx > 0 ? macdRes[idx - 1].histogram : 0
+      for (let i = 0; i < min; i++) {
+        const c = displayData[displayData.length - 1 - i] // 대응하는 displayData 요소
+        const v = macdRes[macdRes.length - 1 - i].histogram
+        const prev = i < min - 1 ? macdRes[macdRes.length - 2 - i].histogram : 0
         let color
         if (v < 0) color = v > prev ? '#FFCDD2' : '#FF5252'
         else if (v > 0) color = v < prev ? '#B2DFDB' : '#26A69A'
         else color = '#888'
-        return { time: c.time, value: v, color }
-      })
 
+        histData.unshift({
+          time: c.time, // 시간
+          value: v,
+          color,
+        })
+        macdData.unshift({
+          time: c.time, // 시간
+          value: macdRes[macdRes.length - 1 - i].MACD,
+        })
+        signalData.unshift({
+          time: c.time, // 시간
+          value: macdRes[macdRes.length - 1 - i].signal,
+        })
+      }
       seriesObj.macdLine.setData(macdData)
       seriesObj.signalLine.setData(signalData)
       seriesObj.hist.setData(histData)
@@ -363,11 +373,14 @@ function updateIndicators(displayData) {
     else if (name === 'ema') {
       const period = params.settings[0].period
       const emaVals = EMA.calculate({ values: closes, period })
-      const offset = 999 - period
-      const data = displayData.map((c, i) => ({
-        time: c.time,
-        value: emaVals[i + offset],
-      }))
+      let data = []
+      for (let i = 0; i < displayData.length; i++) {
+        const c = displayData[displayData.length - 1 - i] // 대응하는 displayData 요소
+        data.unshift({
+          time: c.time, // 시간
+          value: emaVals[emaVals.length - 1 - i],
+        })
+      }
       seriesObj.setData(data)
     }
 
@@ -375,11 +388,14 @@ function updateIndicators(displayData) {
     else if (name === 'sma') {
       const period = params.settings[0].period
       const smaVals = SMA.calculate({ values: closes, period })
-      const offset = 999 - period
-      const data = displayData.map((c, i) => ({
-        time: c.time,
-        value: smaVals[i + offset],
-      }))
+      let data = []
+      for (let i = 0; i < displayData.length; i++) {
+        const c = displayData[displayData.length - 1 - i] // 대응하는 displayData 요소
+        data.unshift({
+          time: c.time, // 시간
+          value: smaVals[smaVals.length - 1 - i],
+        })
+      }
       seriesObj.setData(data)
     }
   })
