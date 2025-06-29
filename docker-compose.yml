@@ -5,8 +5,11 @@ services:
   frontend:
     image: ghcr.io/now-eat-krap/one-more-coin/frontend:latest
     ports:
-      - "80:80"
+      - "80:80"                      # HTTP
+    environment:
+      DOMAIN: one-more-coin.com
     depends_on: [spring, fastapi]
+
 
   # ─────────── Spring Boot ───────────
   spring:
