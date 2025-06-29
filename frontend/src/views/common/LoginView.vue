@@ -58,15 +58,15 @@ const router = useRouter()
 const animationInterval = ref(null)
 
 const handleGoogleLogin = () => {
-  window.location.href = 'http://localhost:8080/oauth2/authorization/google'
+  window.location.href = 'https://one-more-coin.com/oauth2/authorization/google'
 }
 
 const handleKakaoLogin = () => {
-  window.location.href = 'http://localhost:8080/oauth2/authorization/kakao'
+  window.location.href = 'https://one-more-coin.com/oauth2/authorization/kakao'
 }
 
 const handleNaverLogin = () => {
-  window.location.href = 'http://localhost:8080/oauth2/authorization/naver'
+  window.location.href = 'https://one-more-coin.com/oauth2/authorization/naver'
 }
 
 onUnmounted(() => {

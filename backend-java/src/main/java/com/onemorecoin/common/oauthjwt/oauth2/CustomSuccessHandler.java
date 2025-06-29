@@ -56,7 +56,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
         response.setStatus(HttpStatus.OK.value());
-        response.sendRedirect("http://localhost:5173/oauth-callback?access=" + access);
+        response.sendRedirect("https://one-more-coin.com/oauth-callback?access=" + access);
     }
 	
 	private void addRefreshEntity(String username, String refresh, Long expiredMs) {
