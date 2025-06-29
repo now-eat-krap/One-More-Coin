@@ -1,6 +1,7 @@
 import os
 import asyncpg
 import pandas as pd
+from app.core.config import settings
 
 INTERVAL_TABLE_MAP = {
     "1m": "klines_1m",
@@ -26,7 +27,7 @@ SECONDS_MAP = {
 
 async def fetch_candles(exchange, symbol, interval, start_time, end_time):
     print(exchange, symbol, interval, start_time, end_time)
-    db_url = os.getenv("DB_URL")
+    db_url = settings.db_url
     if not db_url:
         raise RuntimeError("DB_URL 환경변수가 설정되지 않았습니다.")
 

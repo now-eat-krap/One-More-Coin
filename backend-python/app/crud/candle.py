@@ -1,6 +1,7 @@
 import asyncpg
 import os
 from typing import Optional
+from app.core.config import settings
 
 INTERVAL_TABLE_MAP = {
     "1m": "klines_1m",
@@ -14,7 +15,7 @@ INTERVAL_TABLE_MAP = {
 }
 
 async def get_candles(exchange: str, symbol: str, interval: str, limit: int, end: Optional[int] = None):
-    db_url = os.getenv("DB_URL")
+    db_url = settings.db_url
     if not db_url:
         raise RuntimeError("DB_URL 환경변수가 설정되지 않았습니다.")
 
