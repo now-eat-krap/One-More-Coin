@@ -3,6 +3,7 @@ import { driver } from 'driver.js'
 import 'driver.js/dist/driver.css'
 
 const TUTORIAL_KEY = 'tutorial_shown'
+let tour = null
 
 export const useTutorial = () => {
   const steps = [
@@ -101,7 +102,7 @@ export const useTutorial = () => {
   const start = () => {
     if (localStorage.getItem(TUTORIAL_KEY) === 'true') return
 
-    const tour = driver({
+    tour = driver({
       onNextClick: () => {
         if (tour.isLastStep()) {
           // ✅ 마지막 단계에서 "다음"을 눌렀을 때 처리
@@ -120,14 +121,19 @@ export const useTutorial = () => {
 
     tour.drive()
   }
+
   const reset = () => {
     localStorage.removeItem(TUTORIAL_KEY)
-    const tour = driver({
-      showProgress: true,
-      steps,
-    })
+    tour.stop()
     tour.drive()
   }
 
-  return { start, reset }
+  const stop = () => {
+    if (tour && tour.isActive()) {
+      tour.destroy() // 하이라이트·팝오버 제거
+      tour = null
+    }
+  }
+
+  return { start, reset, stop }
 }

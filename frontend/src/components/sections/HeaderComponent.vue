@@ -9,15 +9,21 @@
           <div class="flex-shrink-0">
             <img src="@/assets/logo.png" alt="Coin Logo" class="h-10" />
           </div>
-          <span class="ml-2 font-['Roboto_Serif'] font-bold text-2xl text-yellow-400">One More Coin</span>
+          <span class="ml-2 font-['Roboto_Serif'] font-bold text-2xl text-yellow-400"
+            >One More Coin</span
+          >
         </RouterLink>
 
         <!-- 네비게이션 링크 (데스크탑) -->
         <div class="hidden md:flex space-x-8">
-          <RouterLink to="/" class="hover:text-white font-medium">Home</RouterLink>
+          <!-- <RouterLink to="/" class="hover:text-white font-medium">Home</RouterLink>
           <RouterLink to="/features" class="hover:text-white font-medium">Features</RouterLink>
           <RouterLink to="/pricing" class="hover:text-white font-medium">Pricing</RouterLink>
-          <RouterLink to="/contact" class="hover:text-white font-medium">Contact</RouterLink>
+          <RouterLink to="/contact" class="hover:text-white font-medium">Contact</RouterLink> -->
+          <RouterLink to="/chart" class="hover:text-white font-medium">백테스트</RouterLink>
+          <RouterLink to="/portfolio" class="hover:text-white font-medium">포트폴리오</RouterLink>
+          <RouterLink to="/news" class="hover:text-white font-medium">뉴스</RouterLink>
+          <RouterLink to="/community" class="hover:text-white font-medium">커뮤니티</RouterLink>
         </div>
 
         <!-- 우측 버튼들 -->
@@ -134,9 +140,15 @@
         <div v-if="mobileOpen" class="md:hidden bg-stone-900/90 backdrop-blur-sm">
           <nav class="px-4 pt-2 pb-4 space-y-2">
             <RouterLink to="/" class="block py-2 hover:text-white font-medium">Home</RouterLink>
-            <RouterLink to="/features" class="block py-2 hover:text-white font-medium">Features</RouterLink>
-            <RouterLink to="/pricing" class="block py-2 hover:text-white font-medium">Pricing</RouterLink>
-            <RouterLink to="/contact" class="block py-2 hover:text-white font-medium">Contact</RouterLink>
+            <RouterLink to="/features" class="block py-2 hover:text-white font-medium"
+              >Features</RouterLink
+            >
+            <RouterLink to="/pricing" class="block py-2 hover:text-white font-medium"
+              >Pricing</RouterLink
+            >
+            <RouterLink to="/contact" class="block py-2 hover:text-white font-medium"
+              >Contact</RouterLink
+            >
             <div class="mt-2 border-t border-stone-700"></div>
             <template v-if="!isLoggedIn">
               <RouterLink

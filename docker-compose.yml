@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  # ──────────────────────────── Vue + Nginx ────────────────────────────
+  frontend:
+    build: ./frontend                # frontend/Dockerfile
+    ports:
+      - "80:80"                      # HTTP
+    depends_on: [spring, fastapi]
+
+  # ──────────────────────────── Spring Boot ────────────────────────────
+  spring:
+    build: ./backend-java            # backend-java/Dockerfile
+    environment:
+      # ────────── DB (PostgreSQL / TimescaleDB) ──────────
+      SPRING_DATASOURCE_URL: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
+      # ────────── Redis ──────────
+      SPRING_REDIS_HOST: ${REDIS_HOST}
+      SPRING_REDIS_PORT: ${REDIS_PORT}
+
+      # ────────── OAuth (Naver / Google / Kakao) ──────────
+      NAVER_CLIENT_ID:     ${NAVER_CLIENT_ID}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID:    ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      KAKAO_CLIENT_ID:     ${KAKAO_CLIENT_ID}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
+      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE}
+
+      # ────────── JWT ──────────
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on: [redis]
+
+  # ──────────────────────────── FastAPI ────────────────────────────────
+  fastapi:
+    build: ./backend-python          # backend-python/Dockerfile
+    ports:
+      - "8000:8000"                  # 내부 통신용, 외부 차단해도 OK
+    environment:
+      DB_URL:      postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      REDIS_URL:   redis://${REDIS_HOST}:${REDIS_PORT}/0
+      JWT_SECRET:  ${JWT_SECRET}
+    depends_on: [redis]
+
+  # ───────────────────────────── Redis ─────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server",
+              "--maxmemory", "128mb",
+              "--maxmemory-policy", "allkeys-lru"]
+    ports:                           # 외부 공개가 필요 없으면 이 줄 삭제
+      - "6379:6379"

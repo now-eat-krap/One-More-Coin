@@ -1,3 +1,6 @@
 /.metadata/
 
 timscaleDb_fill
+
+.env
+.env*
