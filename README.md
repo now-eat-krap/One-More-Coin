@@ -8,7 +8,9 @@
 ## 🗂️ 팀 문서 & 자료 링크
 
 <p align="center">
-  <a href="https://placid-cyclamen-a90.notion.site/201bccba6df980c6bda6dc08abe0b892?pvs=73">📒 팀 노션</a> &nbsp;|&nbsp;
+  <a href="https://placid-cyclamen-a90.notion.site/201bccba6df980c6bda6dc08abe0b892">노션</a> &nbsp;|&nbsp;
+  <a href="https://placid-cyclamen-a90.notion.site/208bccba6df980dd9853ca5de8807e79"> 개발 문서</a> &nbsp;
+  
 </p>
 
 <br/>
@@ -61,7 +63,7 @@ $ npm start
 |------|-----------|
 | **Frontend** | [![My Skills](https://skillicons.dev/icons?i=vue,vite,tailwind,js)](https://skillicons.dev) |
 | **Backend** | [![My Skills](https://skillicons.dev/icons?i=java,spring,fastapi)](https://skillicons.dev)  |
-| **DB / Infra** | [![My Skills](https://skillicons.dev/icons?i=mysql)](https://skillicons.dev) |
+| **DB / Infra** | [![My Skills](https://skillicons.dev/icons?i=mysql,redis)](https://skillicons.dev) |
 | **배포** | [![My Skills](https://skillicons.dev/icons?i=githubactions,docker)](https://skillicons.dev) |
 | **협업** | [![My Skills](https://skillicons.dev/icons?i=figma,git,github,notion)](https://skillicons.dev) |
 
@@ -95,8 +97,6 @@ $ npm start
 ## 기본 구조
 ```
 type : subject
-
-body 
 ```
 
 <br/>
@@ -106,6 +106,7 @@ body
 feat : 새로운 기능 추가
 fix : 버그 수정
 docs : 문서 수정
+design : CSS 등 사용자 UI 디자인 변경
 style : 코드 포맷팅, 세미콜론 누락, 코드 변경이 없는 경우
 refactor : 코드 리펙토링
 test : 테스트 코드, 리펙토링 테스트 코드 추가
@@ -114,43 +115,12 @@ chore : 빌드 업무 수정, 패키지 매니저 수정
 
 <br/>
 
-## 커밋 이모지
-```
-== 코드 관련
-📝	코드 작성
-🔥	코드 제거
-🔨	코드 리팩토링
-💄	UI / style 변경
-
-== 문서&파일
-📰	새 파일 생성
-🔥	파일 제거
-📚	문서 작성
-
-== 버그
-🐛	버그 리포트
-🚑	버그를 고칠 때
-
-== 기타
-🐎	성능 향상
-✨	새로운 기능 구현
-💡	새로운 아이디어
-🚀	배포
-```
-
-<br/>
-
 ## 커밋 예시
 ```
 == ex1
-✨Feat: "회원 가입 기능 구현"
-
-SMS, 이메일 중복확인 API 개발
-
+Feat: "회원 가입 기능 구현"
 == ex2
-📚chore: styled-components 라이브러리 설치
-
-UI개발을 위한 라이브러리 styled-components 설치
+chore: styled-components 라이브러리 설치
 ```
 
 <br/>
