@@ -6,6 +6,8 @@ services:
     build: ./frontend                # frontend/Dockerfile
     ports:
       - "80:80"                      # HTTP
+    environment:
+      DOMAIN: one-more-coin.com
     depends_on: [spring, fastapi]
 
   # ──────────────────────────── Spring Boot ────────────────────────────
