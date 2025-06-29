@@ -59,24 +59,14 @@ services:
     volumes:
       - ./redis-data:/data
 
-   # ─────────── Certbot (Let's Encrypt) ───────────
+  # ─────────── Certbot (1회용) ───────────
   certbot:
     image: certbot/certbot:latest
-    restart: unless-stopped          # 컨테이너 재시작 정책
+    profiles: ["cert"]        # 필요할 때만 실행하도록 profile 지정
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    entrypoint: >
-      sh -c "
-        # -------- 최초 1회 발급 --------
-        if [ ! -f /etc/letsencrypt/live/one-more-coin.com/fullchain.pem ]; then
-          certbot certonly --webroot -w /var/www/certbot \
-            --email you@example.com --agree-tos --no-eff-email \
-            -d one-more-coin.com -d www.one-more-coin.com
-        fi &&
-        # -------- 12시간마다 자동 갱신 --------
-        while :; do
-          certbot renew --quiet
-          sleep 12h
-        done
-      "
+    command: >
+      certonly --webroot -w /var/www/certbot
+      --email taewonb916@gmail.com --agree-tos --no-eff-email
+      -d one-more-coin.com -d www.one-more-coin.com
