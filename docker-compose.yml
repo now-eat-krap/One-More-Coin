@@ -19,6 +19,7 @@ services:
   spring:
     image: ghcr.io/now-eat-krap/one-more-coin/backend-java:latest
     environment:
+      OAUTH_CALLBACK_BASE: ${OAUTH_REDIRECT_BASE}
       # ─── DB ───
       DB_HOST:     ${DB_HOST}
       DB_PORT:     ${DB_PORT}
