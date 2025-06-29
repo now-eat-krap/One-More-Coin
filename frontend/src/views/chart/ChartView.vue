@@ -178,7 +178,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted, nextTick, onUnmounted } from 'vue'
 import LiveChart from '@/components/chart/LiveChart.vue'
 import BacktestConfig from '@/components/backtest/BacktestConfig.vue'
 import SelectStrategies from '@/components/backtest/SelectStrategies.vue'
@@ -196,7 +196,7 @@ const STORAGE_KEYS = {
 const chartSettings = ref({
   symbol: localStorage.getItem(STORAGE_KEYS.SYMBOL) || 'btcusdt',
   exchange: localStorage.getItem(STORAGE_KEYS.EXCHANGE) || 'binance',
-  interval: localStorage.getItem(STORAGE_KEYS.INTERVAL) || '1m',
+  interval: localStorage.getItem(STORAGE_KEYS.INTERVAL) || '1d',
 })
 
 // 선택된 코인 정보
@@ -271,7 +271,7 @@ const handleSaveStrategy = (strategy) => {
   currentStrategy.value = strategy
 }
 
-const { start } = useTutorial()
+const { start, stop } = useTutorial()
 
 onMounted(async () => {
   await nextTick()
@@ -279,6 +279,8 @@ onMounted(async () => {
     start()
   }, 300)
 })
+
+onUnmounted(stop)
 </script>
 
 <style scoped>

@@ -23,6 +23,31 @@ const router = createRouter({
       path: '/chart',
       name: 'chart',
       component: () => import('@/views/chart/ChartView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/portfolio',
+      name: 'portfolio',
+      component: () => import('@/views/common/PreparingContent.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/news',
+      name: 'news',
+      component: () => import('@/views/common/PreparingContent.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/community',
+      name: 'community',
+      component: () => import('@/views/common/PreparingContent.vue'),
+      meta: { requiresAuth: true },
+    },
+    // 404 Not Found
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'NotFound',
+      component: () => import('@/views/common/NotFound.vue'),
     },
   ],
 })
@@ -38,6 +63,12 @@ router.beforeEach((to, from, next) => {
     if (name) {
       authStore.setLoginState(name)
     }
+  }
+
+  // ② 보호 라우트인데 로그인 안 됐으면 /login 으로
+  if (to.meta.requiresAuth && !authStore.isLoggedIn) {
+    next({ path: '/login' })
+    return
   }
 
   // 로그인된 상태에서 로그인 페이지 접근 시 홈으로 리다이렉트
