@@ -984,7 +984,7 @@ const runBacktest = async () => {
   console.log(JSON.stringify(data.conditions))
 
   try {
-    const response = await axios.post('http://localhost:8000/api/v1/backtest', data)
+    const response = await axios.post('/api/v1/backtest', data)
 
     const result = { ...data, ...response.data }
 

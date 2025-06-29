@@ -99,7 +99,7 @@ async function fetchCandleData() {
       limit: candleCount + 1000,
     }
 
-    const resp = await axios.get('http://localhost:8000/api/v1/candles', { params })
+    const resp = await axios.get('/api/v1/candles', { params })
     if (resp.data && resp.data.length > 0) {
       allCandleData.value = resp.data
         .map((c) => ({
