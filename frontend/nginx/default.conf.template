@@ -1,14 +1,18 @@
-# HTTP → HTTPS
+# ---------------- HTTP 80 → HTTPS 443 ----------------
 server {
     listen 80;
     server_name ${DOMAIN} www.${DOMAIN};
+
+    # certbot 챌린지용
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
+
+    # 나머지는 HTTPS 로 강제 이동
     return 301 https://$host$request_uri;
 }
 
-# HTTPS
+# ---------------- HTTPS 443 --------------------------
 server {
     listen 443 ssl;
     server_name ${DOMAIN} www.${DOMAIN};
@@ -16,31 +20,32 @@ server {
     ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
 
+    # ---------- 정적(Vite 빌드 파일) ----------
     location / {
         root /usr/share/nginx/html;
         try_files $uri $uri/ /index.html;
     }
-}
 
-# 🎯 1) OAuth2 리다이렉트 & Spring API 프록시
-location /oauth2/ {
-    proxy_pass         http://spring:8080/oauth2/;   # ← 컨테이너 이름:포트
-    proxy_set_header   Host $host;
-    proxy_set_header   X-Real-IP $remote_addr;
-    proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-}
+    # ---------- OAuth2 리다이렉트 ----------
+    location /oauth2/ {
+        proxy_pass http://spring:8080/oauth2/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
 
-location /login/ {
-    proxy_pass         http://spring:8080/login/;
-    proxy_set_header   Host $host;
-    proxy_set_header   X-Real-IP $remote_addr;
-    proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
-}
+    location /login/ {
+        proxy_pass http://spring:8080/login/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
 
-# 🎯 2) 일반 REST API (예: /api/**) 도 필요하다면
-location /api/ {
-    proxy_pass         http://spring:8080/api/;
-    proxy_set_header   Host $host;
-    proxy_set_header   X-Real-IP $remote_addr;
-    proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+    # ---------- 일반 REST API ----------
+    location /api/ {
+        proxy_pass http://fastapi:8000/api/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
 }

@@ -5,7 +5,7 @@ import router from '@/router'
 import { refreshToken } from '@/composables/useTokenRefresh'
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080',
+  baseURL: '',
   withCredentials: true,
 })
 
