@@ -20,16 +20,25 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
 	private final JWTUtil jwtUtil;
-	private final RefreshTokenRepository refreshTokenRepository;
-	public CustomSuccessHandler(JWTUtil jwtUtil, RefreshTokenRepository refreshTokenRepository) {
-		this.jwtUtil = jwtUtil;
-		this.refreshTokenRepository = refreshTokenRepository;
-	}
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final String callbackBase;   // ← 도메인 기반 URL
+
+    public CustomSuccessHandler(
+            JWTUtil jwtUtil,
+            RefreshTokenRepository refreshTokenRepository,
+            @Value("${oauth.callback-base}") String callbackBase) {
+        this.jwtUtil = jwtUtil;
+        this.refreshTokenRepository = refreshTokenRepository;
+        this.callbackBase = callbackBase;
+    }
+
+
 
 	@Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -56,8 +65,10 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         response.setHeader("access", access);
         response.addCookie(createCookie("refresh", refresh));
         response.setStatus(HttpStatus.OK.value());
-        response.sendRedirect("https://one-more-coin.com/oauth-callback?access=" + access);
-    }
+         // 동적으로 리다이렉트 URL 구성
+        String redirectUrl = String.format("%s/oauth-callback?access=%s", callbackBase, access);
+        response.sendRedirect(redirectUrl);
+	}
 	
 	private void addRefreshEntity(String username, String refresh, Long expiredMs) {
 
