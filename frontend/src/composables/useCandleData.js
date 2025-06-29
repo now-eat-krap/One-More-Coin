@@ -24,7 +24,7 @@ export function useCandleData(props) {
 
   const loadOlderCandlesFromTimescale = async (endTimeUtcSec, limit) => {
     try {
-      const resp = await axios.get('http://localhost:8000/api/v1/candles', {
+      const resp = await axios.get('/api/v1/candles', {
         params: {
           exchange: props.exchange,
           symbol: props.symbol,
