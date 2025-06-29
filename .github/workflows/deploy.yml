@@ -5,7 +5,8 @@ on:
     branches: [ main ]
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/app
+  # !! REPO 이름을 모두 소문자로 고정 !!
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/one-more-coin/app
   SSH_TARGET: ${{ secrets.APP_USER }}@${{ secrets.APP_HOST }}
 
 jobs:
