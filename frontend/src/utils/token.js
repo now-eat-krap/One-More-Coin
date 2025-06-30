@@ -1,7 +1,7 @@
 // JWT 토큰의 payload 부분을 디코딩하는 함수
 const decodeToken = (token) => {
   if (!token) {
-    console.log('Token is null or undefined')
+    // console.log('Token is null or undefined')
     return null
   }
 
@@ -24,8 +24,8 @@ const decodeToken = (token) => {
 
     return JSON.parse(jsonPayload)
   } catch (error) {
-    console.error('Token parsing error:', error)
-    console.log('Problematic token:', token)
+    // console.error('Token parsing error:', error)
+    // console.log('Problematic token:', token)
     return null
   }
 }

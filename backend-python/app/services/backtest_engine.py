@@ -218,20 +218,20 @@ class JSONStrategy(bt.Strategy):
             # exectype=bt.Order.Market
         # 청산
         if self.position.size > 0 and sell_signal:
-            print(f"[CLOSE LONG] {current_dt} → 매도")
+            #print(f"[CLOSE LONG] {current_dt} → 매도")
             self.close()
 
     def next_open(self):
         """다음 봉의 시가에 매수 로직 처리"""
         dt = self.data.datetime.datetime(0)
-        print(f"▶ next_open called at {dt}, position={self.position.size}")
+        #print(f"▶ next_open called at {dt}, position={self.position.size}")
         buy_signal = all(self._compare(a,b,op) for a,op,b in self.buy_conditions)
-        print(f"  buy_signal = {buy_signal}")
+        #print(f"  buy_signal = {buy_signal}")
 
         if dt < self.start_dt or self.position or not buy_signal:
             return
         o = self.data.open[0]
-        print(f"[BUY @ OPEN] {dt} O={o:.2f}")
+        #print(f"[BUY @ OPEN] {dt} O={o:.2f}")
         self.buy(exectype=bt.Order.Market, cheat=True)
 
     def notify_order(self, order):

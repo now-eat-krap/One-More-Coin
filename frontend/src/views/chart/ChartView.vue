@@ -252,7 +252,7 @@ const backtestResults = ref(null)
 
 // 백테스트, 전략 핸들러
 function handleBacktestComplete(results) {
-  console.log('Backtest results:', results)
+  // console.log('Backtest results:', results)
   backtestResults.value = null
   nextTick(() => {
     backtestResults.value = results
@@ -260,14 +260,14 @@ function handleBacktestComplete(results) {
 }
 
 function handleStrategySelect(strategyId) {
-  console.log('Selected strategy:', strategyId)
+  // console.log('Selected strategy:', strategyId)
 }
 
 // script setup 내부에 추가
 const currentStrategy = ref({})
 
 const handleSaveStrategy = (strategy) => {
-  console.log('Strategy saved:', strategy)
+  // console.log('Strategy saved:', strategy)
   currentStrategy.value = strategy
 }
 
