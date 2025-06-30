@@ -148,7 +148,7 @@
                     fluid
                     iconDisplay="input"
                     :minDate="new Date(rawStartDate) || new Date(startDate)"
-                    :maxDate="new Date()"
+                    :maxDate="new Date(Date.now()-24 * 60 * 60 * 1000)"
                   />
                 </div>
               </div>
@@ -1292,7 +1292,7 @@ const tradeList = ref([])
 const rawStartDate = ref(
   strategyStore.backtestPeriod.startDate
     ? new Date(strategyStore.backtestPeriod.startDate) // 🎯 유효 문자열이면 Date로
-    : new Date(),
+    : new Date(Date.now()-24 * 60 * 60 * 1000),
 )
 
 /* ✅ 1. computed: 항상 최신 값 유지 */
@@ -1313,7 +1313,7 @@ watch(rawStartDate, (val) => {
 const rawEndDate = ref(
   strategyStore.backtestPeriod.endDate
     ? new Date(strategyStore.backtestPeriod.endDate) // 🎯 유효 문자열이면 Date로
-    : new Date(),
+    : new Date(Date.now()-24 * 60 * 60 * 1000),
 )
 
 watch(rawEndDate, (val) => {

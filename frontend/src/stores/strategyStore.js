@@ -6,8 +6,8 @@ export const useStrategyStore = defineStore('strategy', {
     buyConditions: useStorage('strategy-buy-conditions', []),
     sellConditions: useStorage('strategy-sell-conditions', []),
     backtestPeriod: useStorage('backtest-period', {
-      startDate: '',
-      endDate: '',
+      startDate: new Date(Date.now()-24 * 60 * 60 * 1000), // 하루 어제 날짜
+      endDate: new Date(Date.now()-24 * 60 * 60 * 1000), // 하루 어제 날짜
     }),
     advancedSettings: useStorage('advanced-settings', {
       initialCapital: 1000000,
