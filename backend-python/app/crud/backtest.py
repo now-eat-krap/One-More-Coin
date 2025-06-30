@@ -26,7 +26,7 @@ SECONDS_MAP = {
     }
 
 async def fetch_candles(exchange, symbol, interval, start_time, end_time):
-    print(exchange, symbol, interval, start_time, end_time)
+    # print(exchange, symbol, interval, start_time, end_time)
     db_url = settings.db_url
     if not db_url:
         raise RuntimeError("DB_URL 환경변수가 설정되지 않았습니다.")

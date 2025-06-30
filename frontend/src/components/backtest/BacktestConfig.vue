@@ -931,7 +931,7 @@ const overview = ref(null)
 watch(
   () => strategyStore.buyConditions,
   (newBuyConditions) => {
-    console.log('Buy conditions changed:', newBuyConditions) // 디버깅용
+    // console.log('Buy conditions changed:', newBuyConditions) // 디버깅용
     buyConditions.value = newBuyConditions
   },
   { deep: true, immediate: true },
@@ -981,7 +981,7 @@ const runBacktest = async () => {
     advancedSettings: strategyStore.advancedSettings,
   }
 
-  console.log(JSON.stringify(data.conditions))
+  // console.log(JSON.stringify(data.conditions))
 
   try {
     const response = await axios.post('/api/v1/backtest', data)
@@ -1280,7 +1280,7 @@ const showAdvancedSettingsModal = ref(false)
 
 const saveAdvancedSettings = () => {
   // 고급 설정 저장 로직은 이제 스토어에서 직접 v-model로 처리되므로, 별도의 저장 로직 불필요.
-  console.log('Advanced Settings saved:', strategyStore.advancedSettings)
+  // console.log('Advanced Settings saved:', strategyStore.advancedSettings)
   showAdvancedSettingsModal.value = false
 }
 

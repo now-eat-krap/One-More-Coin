@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.post("/backtest")
 async def run_backtest_api(request: BacktestRequest):
-    print(request)
+    # print(request)
     start_ts = int(datetime.strptime(request.period.startDate, "%Y-%m-%d").timestamp())
     end_ts = int(datetime.strptime(request.period.endDate, "%Y-%m-%d").timestamp())
 
@@ -40,7 +40,7 @@ async def run_backtest_api(request: BacktestRequest):
     # Pandas에서 timestamp 변환
     df["time"] = pd.to_datetime(df["time"].astype(float), unit="s")
     df.set_index("time", inplace=True)
-    print([c.dict() for c in request.conditions["buy"]])
+    # print([c.dict() for c in request.conditions["buy"]])
 
 
     if(request.advancedSettings.orderSizeUnit == '%'): #fractional 사용

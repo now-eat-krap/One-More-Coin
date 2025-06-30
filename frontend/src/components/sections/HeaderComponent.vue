@@ -209,10 +209,10 @@ const checkTokenExpiration = () => {
   const token = localStorage.getItem('access')
   if (token) {
     if (isTokenExpired(token)) {
-      console.log('토큰이 만료되었습니다.')
+      // console.log('토큰이 만료되었습니다.')
     }
     const expirationTime = getTokenExpirationTime(token)
-    console.log('토큰 만료 시간:', expirationTime)
+    // console.log('토큰 만료 시간:', expirationTime)
   }
 }
 

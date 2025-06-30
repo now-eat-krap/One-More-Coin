@@ -219,7 +219,7 @@ const strategy = computed(() => {
 
 const tryStrategy = () => {
   save(props.strategyId)
-  console.log(props.strategyId)
+  // console.log(props.strategyId)
   emit('close')
 }
 
