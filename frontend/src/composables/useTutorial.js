@@ -74,7 +74,7 @@ export const useTutorial = () => {
       element: '#step4',
       popover: {
         title: '날짜 선택',
-        description: '백테스팅 기간을 선택할 수 있어요.',
+        description: '백테스팅 기간을 선택할 수 있어요. 데이터의 정확성을 위해 하루 전날 까지 선택 가능합니다.',
         side: 'bottom',
         align: 'center',
       },

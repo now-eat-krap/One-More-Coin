@@ -1,0 +1,75 @@
+version: "3.9"
+
+services:
+  # ─── Vue + Vite dev 서버 (**Nginx 대신 Vite**)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - DOMAIN=http://localhost:8080
+    command: npm run dev
+
+  # ─── Spring Boot (devtools 핫스왑 가능)
+  spring:
+    build:
+      context: ./backend-java
+      dockerfile: Dockerfile.dev
+      # target: dev           # Dockerfile 멀티-스테이지에서 dev 타깃 분리해 두면 편리
+    # volumes:
+    #   - ./backend-java:/app
+    #   - ~/.m2:/root/.m2     # gradle‧maven 캐시 공유
+    env_file:
+      - .env.dev
+    environment:
+      OAUTH_CALLBACK_BASE: http://localhost:5173
+      # ─── DB ───
+      DB_HOST:     ${DB_HOST}
+      DB_PORT:     ${DB_PORT}
+      DB_NAME:     ${DB_NAME}
+      DB_USER:     ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+
+      # ─── Redis ───
+      REDIS_HOST:  ${REDIS_HOST}
+      REDIS_PORT:  ${REDIS_PORT}
+
+      # ─── OAuth & JWT ───
+      NAVER_CLIENT_ID:     ${NAVER_CLIENT_ID}
+      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
+      GOOGLE_CLIENT_ID:    ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      KAKAO_CLIENT_ID:     ${KAKAO_CLIENT_ID}
+      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
+      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE}
+
+      JWT_SECRET: ${JWT_SECRET}
+      
+    ports:
+      - "8080:8080"
+    depends_on: [redis]
+
+  fastapi:
+    build: ./backend-python
+    env_file:
+      - .env.dev
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    # volumes:
+    #   - ./backend-python:/app
+    environment:
+      DB_URL: postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
+      REDIS_URL: redis://${REDIS_HOST}:${REDIS_PORT}/0
+      JWT_SECRET: ${JWT_SECRET}
+    ports:
+      - "8000:8000"
+    depends_on: [redis]
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
