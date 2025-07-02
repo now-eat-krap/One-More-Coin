@@ -65,7 +65,7 @@ jobs:
         key:      ${{ secrets.APP_KEY }}    # PEM RSA 개인키
         port:     10000                        # 바꿨다면 수정
         script: |
-          cd ~/app
+          cd ~/workspace/app
           docker login ${{ env.REGISTRY }} -u ${{ github.actor }} -p ${{ secrets.GITHUB_TOKEN }}
           docker compose pull
           docker compose up -d --remove-orphans
