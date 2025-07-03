@@ -7,13 +7,9 @@
 <br/>
 <br/>
 
-## 🗂️ 팀 문서 & 자료 링크
-
-<p align="center">
-  <a href="https://placid-cyclamen-a90.notion.site/201bccba6df980c6bda6dc08abe0b892">노션</a> &nbsp;|&nbsp;
-  <a href="https://placid-cyclamen-a90.notion.site/208bccba6df980dd9853ca5de8807e79"> 개발 문서</a> &nbsp;
-  
-</p>
+## 팀 문서 & 자료 링크
+- 🗂️ [팀 노션](https://placid-cyclamen-a90.notion.site/201bccba6df980c6bda6dc08abe0b892)
+- 📄 [개발 문서](https://placid-cyclamen-a90.notion.site/208bccba6df980dd9853ca5de8807e79)
 
 <br/>
 <br/>
