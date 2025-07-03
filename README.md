@@ -1,6 +1,8 @@
-<a target="_blank">
-<img  alt="배너" width="100%"/>
+<a href="https://one-more-coin.com"  target="_blank">
+<img src="https://github.com/user-attachments/assets/102c4bf4-c91e-4d33-b2a6-3a609774f32a" alt="배너" width="100%"/>
 </a>
+
+- 배포 URL : [https://one-more-coin.com](https://one-more-coin.com)
 
 <br/>
 <br/>
@@ -12,15 +14,6 @@
   <a href="https://placid-cyclamen-a90.notion.site/208bccba6df980dd9853ca5de8807e79"> 개발 문서</a> &nbsp;
   
 </p>
-
-<br/>
-<br/>
-
-# 0. Getting Started (시작하기)
-```bash
-$ npm start
-```
-[서비스 링크](링크 추가 예정)
 
 <br/>
 <br/>
@@ -43,8 +36,31 @@ $ npm start
 <br/>
 
 # 3. Key Features (주요 기능)
-- **추가예정**:
-  - 추가예정
+## 1. 다양한 투자 전략 백테스팅
+- 이동평균선, RSI, 캔들패턴 등 여러 가지 투자 전략을 직접 선택하여 과거 데이터로 손쉽게 백테스트할 수 있습니다.
+![조건](https://github.com/user-attachments/assets/4ac804a1-3392-47d1-a0ad-cd82fc76f579)
+- 사용자는 원하는 전략을 조합하여 자신만의 전략을 실험할 수 있습니다.
+![조건저장](https://github.com/user-attachments/assets/0f538f0d-55e7-4558-9902-12b7d42d3b21)
+
+## 2. 실시간 차트 및 결과 시각화
+- 백테스트 결과를 직관적인 차트와 그래프로 시각화하여, 수익률, 매수/매도 시점 등 핵심 정보를 한눈에 확인할 수 있습니다.
+- 실시간으로 데이터가 반영되어, 전략의 효과를 즉시 파악할 수 있습니다.
+![실시간차트](https://github.com/user-attachments/assets/fa3d4b31-7d3e-421a-a035-98b37d5ca9cf)
+
+## 3. 전략별 상세 분석
+- 각 전략별로 거래 내역, 수익률, 최대 낙폭 등 상세한 분석 리포트를 제공합니다.
+- 전략의 강점과 약점을 구체적으로 파악할 수 있습니다.
+![상세분석](https://github.com/user-attachments/assets/fd877af1-9cf2-4dec-9ed7-0c141357d450)
+
+## 4. 홈서버 구축
+- 미니 PC와 DDNS를 활용해 직접 홈서버를 구축하여, 언제 어디서나 서비스에 접속할 수 있습니다.
+- 저비용으로 안정적인 서버 운영이 가능하며, 네트워크 환경에 구애받지 않습니다.
+[홈서버 구축 문서](https://placid-cyclamen-a90.notion.site/222bccba6df9807cb941f95f6d9cd161)
+
+## 5. GitHub Actions + Docker를 이용한 자동 무중단 배포
+- GitHub Actions와 Docker를 활용해 코드가 변경될 때마다 자동으로 빌드 및 무중단 배포가 이루어집니다.
+- 개발-배포-운영의 전 과정을 자동화하여, 서비스의 안정성과 효율성을 높였습니다.
+[github actions 문서](https://placid-cyclamen-a90.notion.site/Github-Actions-221bccba6df9803681a9f011ac60a126)
 
 <br/>
 <br/>
@@ -52,7 +68,7 @@ $ npm start
 # 4. Tasks & Responsibilities (작업 및 역할 분담)
 |  |  |  |
 |-----------------|-----------------|-----------------|
-| 박태원    |  사진추가예정 | 추가예정     |
+| 박태원    |  사진추가예정 | <ul><li>전체 프로젝트 총괄</li></ul>    |
 
 
 <br/>
@@ -63,16 +79,22 @@ $ npm start
 |------|-----------|
 | **Frontend** | [![My Skills](https://skillicons.dev/icons?i=vue,vite,tailwind,js)](https://skillicons.dev) |
 | **Backend** | [![My Skills](https://skillicons.dev/icons?i=java,spring,fastapi)](https://skillicons.dev)  |
-| **DB / Infra** | [![My Skills](https://skillicons.dev/icons?i=mysql,redis)](https://skillicons.dev) |
+| **DB / Infra** | [![My Skills](https://skillicons.dev/icons?i=postgres,redis)](https://skillicons.dev) |
 | **배포** | [![My Skills](https://skillicons.dev/icons?i=githubactions,docker)](https://skillicons.dev) |
-| **협업** | [![My Skills](https://skillicons.dev/icons?i=figma,git,github,notion)](https://skillicons.dev) |
+| **협업** | [![My Skills](https://skillicons.dev/icons?i=git,github,notion)](https://skillicons.dev) |
 
 <br/>
 <br/>
 
 # 6. Project Structure (프로젝트 구조)
 ```plaintext
-추가 예정
+One-More-Coin/
+  ├─ backend-java/      # Spring Boot 백엔드
+  ├─ backend-python/    # FastAPI 백엔드
+  ├─ frontend/          # Vue3 프론트엔드
+  ├─ docker-compose.yml # 배포용 도커 컴포즈 설정
+  ├─ docker-compose.dev.yml # 개발용 도커 컴포즈 설정
+  └─ README.md
 ```
 
 <br/>
