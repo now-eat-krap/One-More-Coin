@@ -83,7 +83,7 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         ResponseCookie refreshCookie = ResponseCookie.from("REFRESH", refresh)   // ★ 수정
                 .httpOnly(true).secure(true)
                 .sameSite("Strict")
-                .path("/springapi/reissue")
+                .path("/")
                 .maxAge(Duration.ofDays(refreshExp))
                 .build();
         
