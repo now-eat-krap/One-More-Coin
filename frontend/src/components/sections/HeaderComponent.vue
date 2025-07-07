@@ -189,93 +189,51 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import api from '@/plugins/axios'
-import { isTokenExpired, getTokenExpirationTime } from '@/utils/token'
+import { apiSpring } from '@/plugins/axios'
 
-const router = useRouter()
-const authStore = useAuthStore()
-const mobileOpen = ref(false)
-const isUserMenuOpen = ref(false)
+/* ─── 상태 & 참조 ───────────────────────────── */
+const router           = useRouter()
+const authStore        = useAuthStore()
 
-// computed로 변경
-const isLoggedIn = computed(() => authStore.isLoggedIn)
-const userName = computed(() => authStore.userName)
+const mobileOpen       = ref(false)
+const isUserMenuOpen   = ref(false)
 
-// 토큰 만료 체크 함수
-const checkTokenExpiration = () => {
-  const token = localStorage.getItem('access')
-  if (token) {
-    if (isTokenExpired(token)) {
-      // console.log('토큰이 만료되었습니다.')
-    }
-    const expirationTime = getTokenExpirationTime(token)
-    // console.log('토큰 만료 시간:', expirationTime)
-  }
-}
+/* ─── Pinia 값 사용 ────────────────────────── */
+const isLoggedIn = computed(() => !!authStore.name)   // name 이 null 아니면 로그인
+const userName   = computed(() => authStore.name)
 
-// 로그인 상태가 변경될 때마다 토큰 만료 체크
-watch(isLoggedIn, (newValue) => {
-  if (newValue) {
-    checkTokenExpiration()
-  }
-})
-
-// 로그인 상태 확인
+/* ─── 마운트 & 언마운트 ─────────────────────── */
 onMounted(() => {
-  const name = localStorage.getItem('name')
-  if (name) {
-    authStore.setLoginState(name)
-  }
-
-  // 드롭다운 메뉴 외부 클릭 시 닫기
   document.addEventListener('click', handleClickOutside)
-
-  // 초기 토큰 만료 체크
-  checkTokenExpiration()
 })
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 
-// 드롭다운 메뉴 토글
-function toggleUserMenu(event) {
-  event.stopPropagation()
+/* ─── 드롭다운 & 모바일 메뉴 ───────────────── */
+function toggleUserMenu (e) {
+  e.stopPropagation()
   isUserMenuOpen.value = !isUserMenuOpen.value
 }
 
-// 드롭다운 메뉴 외부 클릭 시 닫기
-function handleClickOutside(event) {
+function handleClickOutside (e) {
   const dropdown = document.querySelector('.relative')
-  if (dropdown && !dropdown.contains(event.target)) {
-    isUserMenuOpen.value = false
-  }
+  if (dropdown && !dropdown.contains(e.target)) isUserMenuOpen.value = false
 }
 
-// 모바일 메뉴 토글
-function toggleMobileMenu() {
+function toggleMobileMenu () {
   mobileOpen.value = !mobileOpen.value
 }
 
-// 로그아웃 처리
-async function handleLogout() {
-  try {
-    await api.post('/logout')
-    localStorage.removeItem('name')
-    localStorage.removeItem('access')
-    authStore.clearLoginState()
-    isUserMenuOpen.value = false
-    router.push('/')
-  } catch (err) {
-    console.error('로그아웃 실패:', err)
-    localStorage.removeItem('name')
-    localStorage.removeItem('access')
-    authStore.clearLoginState()
-    router.push('/')
-  }
+/* ─── 로그아웃 ──────────────────────────────── */
+async function handleLogout () {
+  await authStore.logout()              
+  isUserMenuOpen.value = false           
+  router.replace('/login')
 }
 </script>
 

@@ -6,14 +6,17 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    # volumes:
-    #   - ./frontend:/app
-    #   - /app/node_modules
     ports:
-      - "5173:5173"
+      - "443:443"
+      - "80:80"
     environment:
-      - DOMAIN=http://localhost:8080
-    command: npm run dev
+      - DOMAIN=localhost
+    volumes:
+      # mkcert 인증서를 컨테이너 안 /etc/ssl/ 에 넣음
+      - ./infra/certs/local.dev.crt:/etc/ssl/local.dev.crt:ro
+      - ./infra/certs/local.dev.key:/etc/ssl/local.dev.key:ro
+    depends_on: [spring, fastapi]
+
 
   # ─── Spring Boot (devtools 핫스왑 가능)
   spring:
@@ -27,7 +30,7 @@ services:
     env_file:
       - .env.dev
     environment:
-      OAUTH_CALLBACK_BASE: http://localhost:5173
+      OAUTH_CALLBACK_BASE: http://localhost
       # ─── DB ───
       DB_HOST:     ${DB_HOST}
       DB_PORT:     ${DB_PORT}

@@ -1,12 +1,13 @@
 package com.onemorecoin.common.oauthjwt.jwt;
 
 import java.io.IOException;
-
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.onemorecoin.common.oauthjwt.repository.RefreshTokenRepository;
-
 import io.jsonwebtoken.ExpiredJwtException;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;
@@ -17,95 +18,91 @@ import jakarta.servlet.http.HttpServletResponse;
 
 public class CustomLogoutFilter extends GenericFilterBean {
 
+    /* ── 상수 ─────────────────────────────────────────────── */
+    private static final String LOGOUT_URI      = "/logout";
+    private static final String ACCESS_COOKIE   = "ACCESS";
+    private static final String REFRESH_COOKIE  = "REFRESH";
+
     private final JWTUtil jwtUtil;
-    private final RefreshTokenRepository refreshRepository;
+    private final RefreshTokenRepository refreshRepo;
 
-    public CustomLogoutFilter(JWTUtil jwtUtil, RefreshTokenRepository refreshRepository) {
-        this.jwtUtil = jwtUtil;
-        this.refreshRepository = refreshRepository;
+    public CustomLogoutFilter(JWTUtil jwtUtil,
+                              RefreshTokenRepository refreshRepo) {
+        this.jwtUtil     = jwtUtil;
+        this.refreshRepo = refreshRepo;
     }
 
+    /* ====================================================================== */
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+    public void doFilter(ServletRequest  req,
+                         ServletResponse res,
+                         FilterChain     chain)
+                         throws IOException, ServletException {
 
-        doFilter((HttpServletRequest) request, (HttpServletResponse) response, chain);
-    }
-    
-    private void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
+        HttpServletRequest  request  = (HttpServletRequest)  req;
+        HttpServletResponse response = (HttpServletResponse) res;
 
-        //path and method verify
-        String requestUri = request.getRequestURI();
-        if (!requestUri.matches("^\\/logout$")) {
-
-            filterChain.doFilter(request, response);
-            return;
-        }
-        String requestMethod = request.getMethod();
-        if (!requestMethod.equals("POST")) {
-
-            filterChain.doFilter(request, response);
+        /* 1) /logout POST가 아니면 그대로 필터 체인 진행 */
+        if (!LOGOUT_URI.equals(request.getRequestURI())
+            || !"POST".equalsIgnoreCase(request.getMethod())) {
+            chain.doFilter(request, response);
             return;
         }
 
-        //get refresh token
+        /* 2) REFRESH 쿠키 추출 */
         String refresh = null;
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-
-            if (cookie.getName().equals("refresh")) {
-
-                refresh = cookie.getValue();
+        if (cookies != null) {
+            for (Cookie c : cookies) {
+                if (REFRESH_COOKIE.equals(c.getName())) {
+                    refresh = c.getValue();
+                    break;
+                }
             }
         }
-
-        //refresh null check
         if (refresh == null) {
-
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                               "refresh cookie missing");
             return;
         }
 
-        //expired check
+        /* 3) REFRESH 토큰 검증(만료, 카테고리) 및 DB 존재 여부 확인 */
         try {
             jwtUtil.isExpired(refresh);
+            if (!"refresh".equals(jwtUtil.getCategory(refresh))
+                || !refreshRepo.existsById(refresh)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                                   "invalid refresh token");
+                return;
+            }
         } catch (ExpiredJwtException e) {
-
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                               "refresh token expired");
             return;
         }
 
-        // 토큰이 refresh인지 확인 (발급시 페이로드에 명시)
-        String category = jwtUtil.getCategory(refresh);
-        if (!category.equals("refresh")) {
+        /* 4) DB(REDIS) 에서 REFRESH 토큰 삭제 */
+        refreshRepo.deleteById(refresh);
 
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+        /* 5) ACCESS, REFRESH 쿠키 모두 무효화 */
+        ResponseCookie delAccess = ResponseCookie.from(ACCESS_COOKIE, "")
+                .path("/")              // 생성 시와 동일
+                .httpOnly(true).secure(true)
+                .sameSite("Lax")
+                .maxAge(0)
+                .build();
 
-        //DB에 저장되어 있는지 확인
-        Boolean isExist = refreshRepository.existsById(refresh);
-        if (!isExist) {
+        ResponseCookie delRefresh = ResponseCookie.from(REFRESH_COOKIE, "")
+                .path("/")
+                .httpOnly(true).secure(true)
+                .sameSite("Strict")
+                .maxAge(0)
+                .build();
 
-            //response status code
-            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-            return;
-        }
+        response.addHeader(HttpHeaders.SET_COOKIE, delAccess.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, delRefresh.toString());
 
-        //로그아웃 진행
-        //Refresh 토큰 DB에서 제거
-        System.out.println("로그아웃 완료");
-        refreshRepository.deleteById(refresh);
-
-        //Refresh 토큰 Cookie 값 0
-        Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/");
-
-        response.addCookie(cookie);
+        /* 6) OK 응답 */
         response.setStatus(HttpServletResponse.SC_OK);
     }
-
-
 }

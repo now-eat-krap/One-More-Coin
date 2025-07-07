@@ -2,10 +2,14 @@ package com.onemorecoin.common.oauthjwt.service;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -23,9 +27,17 @@ public class ReissueServiceImpl implements ReissueService {
 
 	private final JWTUtil jwtUtil;
 	private final RefreshTokenRepository refreshTokenRepository;
-    public ReissueServiceImpl(JWTUtil jwtUtil, RefreshTokenRepository refreshTokenRepository) {
+	private final int accessExp;
+    private final int refreshExp;
+    
+    public ReissueServiceImpl(JWTUtil jwtUtil,
+    		RefreshTokenRepository refreshTokenRepository,
+    		@Value("${spring.jwt.access-exp}") int accessExp,
+            @Value("${spring.jwt.refresh-exp}") int refreshExp) {
 		this.jwtUtil = jwtUtil;
 		this.refreshTokenRepository = refreshTokenRepository;
+		this.accessExp = accessExp;
+        this.refreshExp = refreshExp;
 	}
 
 	@Override
@@ -36,7 +48,7 @@ public class ReissueServiceImpl implements ReissueService {
         Cookie[] cookies = request.getCookies();
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refresh".equals(cookie.getName())) {
+                if ("REFRESH".equals(cookie.getName())) {
                     refresh = cookie.getValue();
                     break;
                 }
@@ -74,46 +86,45 @@ public class ReissueServiceImpl implements ReissueService {
         String name = jwtUtil.getName(refresh);
         String role = jwtUtil.getRole(refresh);
 
-     // 5. access token 재발급
-        String newAccess = jwtUtil.createJwt("access", username, name, role, 600000L);
-        String newRefresh = jwtUtil.createJwt("refresh", username, name, role, 86400000L);
+        // 5. access token 재발급
+        String newAccess  = jwtUtil.createJwt("access",  username, name, role, accessExp * 60 * 1000L);
+        String newRefresh = jwtUtil.createJwt("refresh", username, name, role, refreshExp * 24 * 60 * 60 * 1000L);
+
         
         //Refresh 토큰 저장 DB에 기존의 Refresh 토큰 삭제 후 새 Refresh 토큰 저장
-        //System.out.println(refresh);
         refreshTokenRepository.deleteById(refresh);
-        addRefreshEntity(username, newRefresh, 86400000L);
+        addRefreshEntity(username, refresh, 14 * 24 * 60 * 60 * 1000L);
         
-        // 응답 헤더에 토큰 설정
-        response.setHeader("access", newAccess);
-        response.addCookie(createCookie("refresh", newRefresh));
+        /* 5) 쿠키 교체 – 성공 핸들러와 동일한 속성 */
+        ResponseCookie accessCookie = ResponseCookie.from("ACCESS", newAccess)
+                .httpOnly(true).secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(Duration.ofMinutes(accessExp))
+                .build();
 
-        // JSON 응답으로 변경
-        Map<String, String> responseBody = new HashMap<>();
-        responseBody.put("accessToken", newAccess);
+        ResponseCookie refreshCookie = ResponseCookie.from("REFRESH", newRefresh)
+                .httpOnly(true).secure(true)
+                .sameSite("Strict")
+                .path("/")
+                .maxAge(Duration.ofDays(refreshExp))
+                .build();
+       
+
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());
         
-        return new ResponseEntity<>(responseBody, HttpStatus.OK);
+        return ResponseEntity.ok().build();   // 바디 불필요, 쿠키만 교체
     }
 	
 	private void addRefreshEntity(String username, String refresh, Long expiredMs) {
 
-	    Date date = new Date(System.currentTimeMillis() + expiredMs);
-
 	    RefreshTokenEntity refreshEntity = new RefreshTokenEntity();
 	    refreshEntity.setUsername(username);
 	    refreshEntity.setRefresh(refresh);
-	    refreshEntity.setExpirations(date.toString());
+	    refreshEntity.setTtl(expiredMs / 1000);
 
 	    refreshTokenRepository.save(refreshEntity);
 	}
-    
-    private Cookie createCookie(String key, String value) {
-
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60);
-        //cookie.setSecure(true);
-        //cookie.setPath("/");
-        cookie.setHttpOnly(true);
-
-        return cookie;
-    }
+   
 }

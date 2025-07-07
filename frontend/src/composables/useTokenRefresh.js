@@ -1,10 +1,10 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import { getTimeUntilExpiration } from '@/utils/token'
-import api from '@/plugins/axios'
+import {apiSpring} from '@/plugins/axios'
 import { useAuthStore } from '@/stores/auth'
 import router from '@/router'
 
-// 로그아웃 처리 함수
+// // 로그아웃 처리 함수
 const handleLogout = () => {
   localStorage.removeItem('access')
   localStorage.removeItem('name')
@@ -16,9 +16,10 @@ const handleLogout = () => {
 // 토큰 갱신 함수를 외부에서도 사용할 수 있도록 분리
 export const refreshToken = async () => {
   try {
-    const response = await api.post('/reissue', null, { withCredentials: true })
+    const response = await apiSpring.post('/reissue', null, { withCredentials: true })
     const newAccessToken = response.data.accessToken
     localStorage.setItem('access', newAccessToken)
+    console.log("토큰 갱신 성공")
     return newAccessToken
   } catch (error) {
     console.error('토큰 갱신 실패:', error)
@@ -56,6 +57,7 @@ export function useTokenRefresh() {
       refreshToken()
         .then(() => {
           // 새로운 토큰으로 타이머 재시작
+          console.log("자동 토큰 갱신 완료")
           startTokenRefreshTimer()
         })
         .catch(error => {
