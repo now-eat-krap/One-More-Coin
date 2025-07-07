@@ -56,7 +56,7 @@ public class SecurityConfig {
 				
 				CorsConfiguration configuration = new CorsConfiguration();
 				
-				configuration.setAllowedOrigins(Collections.singletonList("http://localhost:5173"));
+				configuration.setAllowedOrigins(Collections.singletonList("https://localhost"));
 				configuration.setAllowedMethods(Collections.singletonList("*"));
 				configuration.setAllowCredentials(true);
 				configuration.setAllowedHeaders(Collections.singletonList("*"));
@@ -106,7 +106,7 @@ public class SecurityConfig {
         //경로별 인가 작업
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/","/reissue","/oauth2/**","/login/oauth2/**" ).permitAll()
+                        .requestMatchers("/","/springapi/reissue","/oauth2/**","/login/oauth2/**" ).permitAll()
                         .anyRequest().authenticated());
 
         //세션 설정 : STATELESS

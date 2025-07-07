@@ -1,24 +1,18 @@
-# ---------------- HTTP 80 → HTTPS 443 ----------------
+# ---------- 1) HTTP → HTTPS ----------
 server {
     listen 80;
-    server_name ${DOMAIN} www.${DOMAIN};
-
-    # certbot 챌린지용
-    location /.well-known/acme-challenge/ {
-        root /var/www/certbot;
-    }
-
-    # 나머지는 HTTPS 로 강제 이동
+    server_name ${DOMAIN};
     return 301 https://$host$request_uri;
 }
 
-# ---------------- HTTPS 443 --------------------------
-server {
-    listen 443 ssl;
-    server_name ${DOMAIN} www.${DOMAIN};
 
-    ssl_certificate     /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+# ---------- 2) HTTPS 메인 ----------
+server {
+    listen 443 ssl http2;
+    server_name ${DOMAIN};
+
+    ssl_certificate     /etc/ssl/local.dev.crt;   # ✔ 컨테이너 안 경로
+    ssl_certificate_key /etc/ssl/local.dev.key;
 
     # ----- SPA 정적 파일 -----
     root /usr/share/nginx/html;
@@ -43,20 +37,3 @@ server {
     proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
     proxy_set_header X-Forwarded-Proto https;
 }
-
-
-
-# HTTP (https 인증서버 발급용)
-# server {
-#    listen 80;
-#    server_name ${DOMAIN} www.${DOMAIN};
-#
-#    location /.well-known/acme-challenge/ {
-#        root /var/www/certbot;
-#    }
-#
-#    location / {
-#        root /usr/share/nginx/html;
-#        try_files $uri $uri/ /index.html;
-#   }
-#}

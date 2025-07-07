@@ -2,10 +2,13 @@ package com.onemorecoin.common.oauthjwt.oauth2;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Iterator;
 
+import org.springframework.http.HttpHeaders; 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -22,20 +25,27 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 
+
 @Component
 public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
 
 	private final JWTUtil jwtUtil;
     private final RefreshTokenRepository refreshTokenRepository;
     private final String callbackBase;   // ← 도메인 기반 URL
-
+    private final int accessExp;
+    private final int refreshExp;
+    
     public CustomSuccessHandler(
             JWTUtil jwtUtil,
             RefreshTokenRepository refreshTokenRepository,
-            @Value("${oauth.callback-base}") String callbackBase) {
+            @Value("${oauth.callback-base}") String callbackBase,
+            @Value("${spring.jwt.access-exp}") int accessExp,
+            @Value("${spring.jwt.refresh-exp}") int refreshExp) {
         this.jwtUtil = jwtUtil;
         this.refreshTokenRepository = refreshTokenRepository;
         this.callbackBase = callbackBase;
+        this.accessExp = accessExp;
+        this.refreshExp = refreshExp;
     }
 
 
@@ -55,41 +65,45 @@ public class CustomSuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
         String role = auth.getAuthority();
 
         //토큰 생성
-        String access = jwtUtil.createJwt("access", username, name, role, 600000L);
-        String refresh = jwtUtil.createJwt("refresh", username, name, role, 86400000L);
 
+        String access = jwtUtil.createJwt("access", username, name, role,  accessExp * 60 * 1000L);
+        String refresh = jwtUtil.createJwt("refresh", username, name, role, refreshExp * 24 * 60 * 60 * 1000L);
+        
         //Refresh 토큰 저장
-        addRefreshEntity(username, refresh, 86400000L);
-    	
-        //응답 설정
-        response.setHeader("access", access);
-        response.addCookie(createCookie("refresh", refresh));
+        addRefreshEntity(username, refresh, 14 * 24 * 60 * 60 * 1000L);
+
+         /* 4. 쿠키 생성 ─ HttpOnly + Secure + SameSite */
+        ResponseCookie accessCookie = ResponseCookie.from("ACCESS", access)      // ★ 수정
+                .httpOnly(true).secure(true)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(Duration.ofMinutes(accessExp))
+                .build();
+
+        ResponseCookie refreshCookie = ResponseCookie.from("REFRESH", refresh)   // ★ 수정
+                .httpOnly(true).secure(true)
+                .sameSite("Strict")
+                .path("/springapi/reissue")
+                .maxAge(Duration.ofDays(refreshExp))
+                .build();
+        
+
+        /* 5. 쿠키를 응답 헤더에 추가 */
+        response.addHeader(HttpHeaders.SET_COOKIE, accessCookie.toString());     // ★ 수정
+        response.addHeader(HttpHeaders.SET_COOKIE, refreshCookie.toString());    // ★ 수정
         response.setStatus(HttpStatus.OK.value());
-         // 동적으로 리다이렉트 URL 구성
-        String redirectUrl = String.format("%s/oauth-callback?access=%s", callbackBase, access);
-        response.sendRedirect(redirectUrl);
+
+        /* 6. 프런트 SPA 진입점으로 리다이렉트 (토큰 쿼리 제거) */
+        response.sendRedirect(callbackBase + "/oauth-callback");         
 	}
 	
 	private void addRefreshEntity(String username, String refresh, Long expiredMs) {
 
-	    Date date = new Date(System.currentTimeMillis() + expiredMs);
-
 	    RefreshTokenEntity refreshEntity = new RefreshTokenEntity();
 	    refreshEntity.setUsername(username);
 	    refreshEntity.setRefresh(refresh);
-	    refreshEntity.setExpirations(date.toString());
+	    refreshEntity.setTtl(expiredMs / 1000);
 
 	    refreshTokenRepository.save(refreshEntity);
-	}
-
-	private Cookie createCookie(String key, String value) {
-
-	    Cookie cookie = new Cookie(key, value);
-	    cookie.setMaxAge(24*60*60);
-	    //cookie.setSecure(true);
-	    cookie.setPath("/");
-	    cookie.setHttpOnly(true);
-
-	    return cookie;
 	}
 }

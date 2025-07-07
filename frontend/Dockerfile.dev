@@ -1,6 +1,38 @@
-FROM node:18-alpine
+# FROM node:18-alpine
+# WORKDIR /app
+# COPY package*.json ./
+# RUN npm install
+# COPY . .
+# CMD ["npm", "run", "dev"]
+
+# # 📦 1단계: Vue 앱 빌드
+# FROM node:18-alpine AS build
+# WORKDIR /app
+# COPY . .
+# RUN npm install && npm run build
+
+# # 🌐 2단계: Nginx를 이용한 서빙
+# FROM nginx:alpine
+
+# # Nginx 설정 템플릿 복사
+# COPY ./nginx/default.conf.dev.template /etc/nginx/templates/default.conf.template
+
+# # 빌드된 정적 파일 복사
+# COPY --from=build /app/dist /usr/share/nginx/html
+
+# 1단계: Vue 빌드
+FROM node:18-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-CMD ["npm", "run", "dev"]
+RUN npm run build          # dist/
+
+# 2단계: Nginx로 정적·API 프록시 + TLS 종단
+FROM nginx:1.25-alpine
+
+# 인증서 볼륨 마운트 위치와 경로 맞춰야 함
+COPY ./nginx/default.conf.dev.template /etc/nginx/templates/default.conf.template
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80 443
+CMD ["nginx", "-g", "daemon off;"]
