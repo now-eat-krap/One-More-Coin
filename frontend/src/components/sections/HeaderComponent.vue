@@ -9,9 +9,7 @@
           <div class="flex-shrink-0">
             <img src="@/assets/logo.png" alt="Coin Logo" class="h-10" />
           </div>
-          <span class="ml-2 font-['Roboto_Serif'] font-bold text-2xl text-yellow-400"
-            >One More Coin</span
-          >
+          <span class="ml-2 font-mono font-bold text-2xl text-yellow-300">OMC</span>
         </RouterLink>
 
         <!-- 네비게이션 링크 (데스크탑) -->
@@ -20,10 +18,47 @@
           <RouterLink to="/features" class="hover:text-white font-medium">Features</RouterLink>
           <RouterLink to="/pricing" class="hover:text-white font-medium">Pricing</RouterLink>
           <RouterLink to="/contact" class="hover:text-white font-medium">Contact</RouterLink> -->
-          <RouterLink to="/chart" class="hover:text-white font-medium">백테스트</RouterLink>
-          <RouterLink to="/portfolio" class="hover:text-white font-medium">포트폴리오</RouterLink>
-          <RouterLink to="/news" class="hover:text-white font-medium">뉴스</RouterLink>
-          <RouterLink to="/community" class="hover:text-white font-medium">커뮤니티</RouterLink>
+
+          <!-- 백테스트 드롭다운 메뉴 -->
+          <div class="relative group">
+            <button class="hover:text-white font-medium flex items-center">
+              백테스트
+              <svg
+                class="w-4 h-4 ml-1 transition-transform duration-200 group-hover:rotate-180"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+            <div
+              class="absolute left-0 mt-2 w-48 bg-stone-900 rounded-lg shadow-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50"
+            >
+              <RouterLink
+                :to="{ name: 'BacktestStrategy' }"
+                class="block px-4 py-2 text-stone-200 hover:bg-stone-800 hover:text-white"
+              >
+                전략 백테스트
+              </RouterLink>
+              <RouterLink
+                :to="{ name: 'BacktestPortfolio' }"
+                class="block px-4 py-2 text-stone-200 hover:bg-stone-800 hover:text-white"
+              >
+                포트폴리오 백테스트
+              </RouterLink>
+            </div>
+          </div>
+
+          <RouterLink :to="{ name: 'news' }" class="hover:text-white font-medium">뉴스</RouterLink>
+          <RouterLink :to="{ name: 'community' }" class="hover:text-white font-medium"
+            >커뮤니티</RouterLink
+          >
         </div>
 
         <!-- 우측 버튼들 -->
@@ -195,15 +230,15 @@ import { useAuthStore } from '@/stores/auth'
 import { apiSpring } from '@/plugins/axios'
 
 /* ─── 상태 & 참조 ───────────────────────────── */
-const router           = useRouter()
-const authStore        = useAuthStore()
+const router = useRouter()
+const authStore = useAuthStore()
 
-const mobileOpen       = ref(false)
-const isUserMenuOpen   = ref(false)
+const mobileOpen = ref(false)
+const isUserMenuOpen = ref(false)
 
 /* ─── Pinia 값 사용 ────────────────────────── */
-const isLoggedIn = computed(() => !!authStore.name)   // name 이 null 아니면 로그인
-const userName   = computed(() => authStore.name)
+const isLoggedIn = computed(() => !!authStore.name) // name 이 null 아니면 로그인
+const userName = computed(() => authStore.name)
 
 /* ─── 마운트 & 언마운트 ─────────────────────── */
 onMounted(() => {
@@ -215,24 +250,24 @@ onUnmounted(() => {
 })
 
 /* ─── 드롭다운 & 모바일 메뉴 ───────────────── */
-function toggleUserMenu (e) {
+function toggleUserMenu(e) {
   e.stopPropagation()
   isUserMenuOpen.value = !isUserMenuOpen.value
 }
 
-function handleClickOutside (e) {
+function handleClickOutside(e) {
   const dropdown = document.querySelector('.relative')
   if (dropdown && !dropdown.contains(e.target)) isUserMenuOpen.value = false
 }
 
-function toggleMobileMenu () {
+function toggleMobileMenu() {
   mobileOpen.value = !mobileOpen.value
 }
 
 /* ─── 로그아웃 ──────────────────────────────── */
-async function handleLogout () {
-  await authStore.logout()              
-  isUserMenuOpen.value = false           
+async function handleLogout() {
+  await authStore.logout()
+  isUserMenuOpen.value = false
   router.replace('/login')
 }
 </script>

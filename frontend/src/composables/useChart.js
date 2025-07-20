@@ -8,8 +8,9 @@ import {
 } from 'lightweight-charts'
 import { SMA, EMA, MACD, RSI } from 'technicalindicators'
 
+let chart, candleSeries
+
 export function useChart(chartContainer, props) {
-  let chart, candleSeries
   const indicatorSeries = {}
 
   const initChart = () => {
@@ -22,7 +23,7 @@ export function useChart(chartContainer, props) {
         panes: {
           separatorColor: '#f22c3d',
           separatorHoverColor: 'rgba(255, 0, 0, 0.1)',
-          enableResize: false,
+          enableResize: true,
         },
       },
       grid: {
@@ -31,7 +32,9 @@ export function useChart(chartContainer, props) {
       },
       crosshair: { mode: CrosshairMode.Normal },
       timeScale: { timeVisible: true, secondsVisible: false },
-      autoSize: true,
+      // autoSize: true,
+      width: chartContainer.value.clientWidth,
+      height: chartContainer.value.clientHeight,
     })
 
     // 메인 캔들 (pane 0)
@@ -175,5 +178,16 @@ export function useChart(chartContainer, props) {
     updateIndicators,
     syncPanes,
     cleanup,
+  }
+}
+
+export const handleResize = (chartContainer) => {
+  if (chart && chartContainer.value) {
+    const width = chartContainer.value.clientWidth
+    const height = chartContainer.value.clientHeight
+    // ① 리사이즈 메서드로 내부 버퍼까지 재할당
+    chart.resize(width, height)
+    // ② 스케일(시간축)을 컨테이너에 딱 맞게 재조정
+    chart.timeScale().fitContent()
   }
 }

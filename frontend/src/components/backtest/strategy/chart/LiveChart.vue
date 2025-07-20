@@ -24,6 +24,7 @@
       </svg>
       <span class="sr-only">Loading...</span>
     </div>
+
     <div class="bg-[#161A25] p-3 flex flex-wrap items-center">
       <span class="text-2xl font-bold">{{ symbol.toUpperCase() }}</span>
       <span class="text-xl font-bold ml-2">. {{ exchange.toUpperCase() }}</span>
@@ -34,7 +35,7 @@
 
     <div class="relative flex-1">
       <!-- 메인 캔들 차트 -->
-      <div ref="chartContainer" class="flex-1 chart-wrapper"></div>
+      <div ref="chartContainer" class="w-full h-full"></div>
 
       <!-- legend -->
       <div ref="legend" class="absolute top-2 left-2 text-xs max-w-[90%] z-10">
@@ -45,8 +46,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch } from 'vue'
-import { useChart } from '@/composables/useChart'
+import { ref, onMounted, onBeforeUnmount, watch, onUnmounted } from 'vue'
+import { useChart, handleResize } from '@/composables/useChart'
 import { useCandleData } from '@/composables/useCandleData'
 import { useChartUI } from '@/composables/useChartUI'
 import { intervalToSeconds } from '@/constants/chart'
@@ -191,9 +192,15 @@ onMounted(async () => {
   await initChartWithInitialCandles()
   connectWebSocket(handleWebSocketMessage)
   isLoadingSpinner.value = false
+  onResize = () => handleResize(chartContainer)
+  window.addEventListener('resize', onResize)
 })
 
 onBeforeUnmount(() => cleanup())
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
+})
 </script>
 
 <style scoped>
