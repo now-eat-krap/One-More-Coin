@@ -135,7 +135,7 @@
       <!-- 좌측 4/5 -->
       <div class="flex flex-col w-3/4 h-full min-h-0">
         <!-- 상단 차트 영역: 남은 공간의 절반 -->
-        <div class="flex-1 border border-gray-700">
+        <div class="flex-1 border border-gray-700 h-1/2">
           <div class="real-time-container h-full">
             <template v-if="backtestResults">
               <BacktestChart
@@ -144,7 +144,13 @@
               />
             </template>
             <template v-else>
-              <LiveChart
+              <!-- <LiveChart
+                :key="`${chartSettings.symbol}-${chartSettings.interval}-${chartSettings.exchange}`"
+                :symbol="chartSettings.symbol"
+                :interval="chartSettings.interval"
+                :exchange="chartSettings.exchange.toLowerCase()"
+              /> -->
+              <TradingViewWidget
                 :key="`${chartSettings.symbol}-${chartSettings.interval}-${chartSettings.exchange}`"
                 :symbol="chartSettings.symbol"
                 :interval="chartSettings.interval"
@@ -155,7 +161,7 @@
         </div>
 
         <!-- 하단 백테스트 영역: 남은 공간의 절반, 내부 스크롤 -->
-        <div class="flex-1 border border-gray-700 p-4 overflow-auto">
+        <div class="flex-1 border border-gray-700 p-4 overflow-auto h-1/2">
           <BacktestConfig
             :symbol="chartSettings.symbol"
             :exchange="chartSettings.exchange"
@@ -167,7 +173,7 @@
       </div>
 
       <!-- 우측 1/5 -->
-      <div class="border border-gray-700 w-1/4 h-full">
+      <div class="border border-gray-700 w-1/4 h-full overflow-auto">
         <SelectStrategies
           @select-strategy="handleStrategySelect"
           @save-strategy="handleSaveStrategy"
@@ -179,11 +185,11 @@
 
 <script setup>
 import { ref, computed, watch, onMounted, nextTick, onUnmounted } from 'vue'
-import LiveChart from '@/components/chart/LiveChart.vue'
-import BacktestConfig from '@/components/backtest/BacktestConfig.vue'
-import SelectStrategies from '@/components/backtest/SelectStrategies.vue'
-import BacktestChart from '@/components/chart/BacktestChart.vue'
+import BacktestConfig from '@/components/backtest/strategy/BacktestConfig.vue'
+import SelectStrategies from '@/components/backtest/strategy/SelectStrategies.vue'
+import BacktestChart from '@/components/backtest/strategy/chart/BacktestChart.vue'
 import { useTutorial } from '@/composables/useTutorial'
+import TradingViewWidget from '@/components/backtest/strategy/chart/TradingViewWidget.vue'
 
 // 로컬스토리지 키
 const STORAGE_KEYS = {

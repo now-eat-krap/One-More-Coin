@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col min-h-screen bg-stone-950 text-stone-200">
     <!-- 헤더 -->
-    <HeaderComponent v-if="route.path !== '/chart'" />
+    <HeaderComponent v-if="!route.path.includes('/backtest')" />
 
     <!-- 메인 컨텐츠 (고정 폭이 아니라 유연하게 늘어남) -->
     <main>
@@ -9,7 +9,7 @@
     </main>
 
     <!-- 푸터 -->
-    <FooterComponent v-if="route.path !== '/chart'" />
+    <FooterComponent v-if="!route.path.includes('/backtest')" />
   </div>
 </template>
 

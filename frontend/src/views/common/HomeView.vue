@@ -7,15 +7,15 @@
     >
       <div class="mx-auto max-w-7xl flex flex-col items-center gap-12">
         <!-- 제목 -->
-        <h1
-          class="text-stone-200 font-['Roboto_Serif'] font-bold text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl text-center leading-snug sm:leading-tight animate-fade-in-up"
+        <h3
+          class="text-stone-200 font-['Roboto_Serif'] font-bold text-3xl sm:text-4xl md:text-3xl lg:text-4xl xl:text-5xl text-center leading-snug sm:leading-tight animate-fade-in-up"
         >
-          당신만의 전략으로<br class="hidden sm:block" />수익을 창출하세요
-        </h1>
+          투자의 새로운 기회, OMC
+        </h3>
 
         <!-- Get Started 버튼 -->
         <RouterLink
-          to="/chart"
+          :to="{ name: 'BacktestStrategy' }"
           class="px-6 py-3 bg-yellow-600 rounded-lg text-stone-200 font-['Public_Sans'] font-medium text-base sm:text-lg md:text-xl hover:bg-yellow-800 transition animate-fade-in-up animation-delay-200"
         >
           전략 백테스트 시작하기

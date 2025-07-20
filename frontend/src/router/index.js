@@ -1,9 +1,5 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, RouterView } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
-import { refreshToken } from '@/composables/useTokenRefresh'
-import { getTimeUntilExpiration } from '@/utils/token'
-
-const REFRESH_THRESHOLD = 60 * 1000
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -24,28 +20,34 @@ const router = createRouter({
       component: () => import('@/views/common/OAuthCallback.vue'),
     },
     {
-      path: '/chart',
-      name: 'chart',
-      component: () => import('@/views/chart/ChartView.vue'),
-      meta: { requiresAuth: true },
-    },
-    {
-      path: '/portfolio',
-      name: 'portfolio',
-      component: () => import('@/views/common/PreparingContent.vue'),
-      meta: { requiresAuth: true },
+      path: '/backtest',
+      // 별도 레이아웃 파일 없이, 바로 자식 뷰만 뿌워주는 wrapper
+      component: RouterView,
+      children: [
+        {
+          path: 'strategy',
+          name: 'BacktestStrategy',
+          // 뷰 컴포넌트만 import
+          component: () => import('@/views/backtest/strategy/StrategyView.vue'),
+          meta: { title: '전략 백테스트', requiresAuth: true },
+        },
+        {
+          path: 'portfolio',
+          name: 'BacktestPortfolio',
+          component: () => import('@/views/backtest/portfolio/PortfolioView.vue'),
+          meta: { title: '포트폴리오 백테스트' },
+        },
+      ],
     },
     {
       path: '/news',
       name: 'news',
       component: () => import('@/views/common/PreparingContent.vue'),
-      meta: { requiresAuth: true },
     },
     {
       path: '/community',
       name: 'community',
       component: () => import('@/views/common/PreparingContent.vue'),
-      meta: { requiresAuth: true },
     },
     // 404 Not Found
     {
@@ -55,7 +57,6 @@ const router = createRouter({
     },
   ],
 })
-
 
 /* ─────────────────────────────────────────────
    전역 가드
@@ -68,7 +69,7 @@ router.beforeEach(async (to, _from, next) => {
 
   // 1) 새로고침 뒤 첫 네비게이션이면 스토어 복원
   if (auth.name === null) {
-    await auth.hydrate()            // 쿠키 기반 /users/me 호출
+    await auth.hydrate() // 쿠키 기반 /users/me 호출
   }
 
   // 2) 인증 필요한데 로그인 안 됐으면 /login
@@ -98,7 +99,7 @@ export default router
 //       if(name) {
 //         authStore.setLoginState(name)
 //       }
-//     } 
+//     }
 //     else {
 //       console.log("갱신 시도")
 //       try {
