@@ -7,7 +7,7 @@ from datetime import datetime
 
 router = APIRouter()
 
-@router.post("/backtest")
+@router.post("/portfolio")
 async def run_backtest_api(request: BacktestRequest):
     # print(request)
     start_ts = int(datetime.strptime(request.period.startDate, "%Y-%m-%d").timestamp())

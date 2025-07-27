@@ -9,18 +9,11 @@ export const useStrategyStore = defineStore('strategy', {
     buyConditions: useStorage('strategy-buy-conditions', []),
     sellConditions: useStorage('strategy-sell-conditions', []),
     backtestPeriod: useStorage('backtest-period', {
-      startDate: ymd(new Date(Date.now()-24 * 60 * 60 * 1000)), // 하루 어제 날짜
-      endDate: ymd(new Date(Date.now()-24 * 60 * 60 * 1000)), // 하루 어제 날짜
+      startDate: ymd(new Date(Date.now() - 24 * 60 * 60 * 1000)), // 하루 어제 날짜
+      endDate: ymd(new Date(Date.now() - 24 * 60 * 60 * 1000)), // 하루 어제 날짜
     }),
     advancedSettings: useStorage('advanced-settings', {
       initialCapital: 1000000,
-      baseCurrency: '기본설정',
-      orderSize: 100,
-      orderSizeUnit: '%',
-      pyramiding: 1,
-      pyramidingUnit: '오더',
-      commission: 0,
-      commissionUnit: '%',
       limitOrderPriceVerification: 0,
       slippage: 0,
       longPositionMargin: 0,

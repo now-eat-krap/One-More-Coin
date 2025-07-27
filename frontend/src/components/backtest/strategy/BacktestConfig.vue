@@ -25,404 +25,242 @@
     </div>
 
     <!-- 탭 메뉴 -->
-    <ul
-      class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400 mb-4"
-    >
-      <li class="me-2">
-        <a
-          href="#"
-          :class="[
-            'inline-block p-4 rounded-t-lg',
-            activeTab === '전략'
-              ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
-              : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
-          ]"
-          @click.prevent="activeTab = '전략'"
-          >전략</a
-        >
-      </li>
-      <li class="me-2">
-        <a
-          href="#"
-          :class="[
-            'inline-block p-4 rounded-t-lg',
-            activeTab === '요약'
-              ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
-              : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
-          ]"
-          @click.prevent="activeTab = '요약'"
-          >요약</a
-        >
-      </li>
-      <li class="me-2">
-        <a
-          href="#"
-          :class="[
-            'inline-block p-4 rounded-t-lg',
-            activeTab === '성과'
-              ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
-              : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
-          ]"
-          @click.prevent="activeTab = '성과'"
-          >성과</a
-        >
-      </li>
-      <li class="me-2">
-        <a
-          href="#"
-          :class="[
-            'inline-block p-4 rounded-t-lg',
-            activeTab === '거래 분석'
-              ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
-              : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
-          ]"
-          @click.prevent="activeTab = '거래 분석'"
-          >거래 분석</a
-        >
-      </li>
-      <li class="me-2">
-        <a
-          href="#"
-          :class="[
-            'inline-block p-4 rounded-t-lg',
-            activeTab === '거래목록'
-              ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
-              : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
-          ]"
-          @click.prevent="activeTab = '거래목록'"
-          >거래목록</a
-        >
-      </li>
-    </ul>
-
-    <!-- 전략 탭 내용 -->
-    <div v-if="activeTab === '전략'" class="flex-1 flex flex-col">
-      <!-- 날짜 선택 -->
-      <div class="mb-4">
-        <div class="flex items-center justify-between">
-          <h4 class="text-lg font-medium text-white">백테스팅 기간</h4>
-
-          <div class="flex items-center gap-4">
-            <!-- Advanced Settings Button -->
-            <button
-              id="step5"
-              @click="showAdvancedSettingsModal = true"
-              class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
-            >
-              고급설정
-            </button>
-            <div id="step4" class="flex gap-4">
-              <div class="relative">
-                <label class="block text-gray-300 text-sm mb-1">시작일</label>
-                <div class="relative w-40">
-                  <DatePicker
-                    v-model="rawStartDate"
-                    dateFormat="yy-mm-dd"
-                    showIcon
-                    fluid
-                    iconDisplay="input"
-                    :maxDate="new Date(rawEndDate) || new Date()"
-                    :minDate="new Date(startDate)"
-                  >
-                    <template #footer>
-                      <div class="mt-2">
-                        <!-- minDate 로 바로 점프 -->
-                        <Button
-                          class="w-full"
-                          label="마지막 날 선택"
-                          size="small"
-                          @click="rawStartDate = new Date(startDate)"
-                        ></Button>
-                      </div>
-                    </template>
-                  </DatePicker>
+    <div class="flex justify-between items-start gap-4 flex-wrap">
+      <ul
+        class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400 mb-4"
+      >
+        <li class="me-2">
+          <a
+            href="#"
+            :class="[
+              'inline-block p-4 rounded-t-lg',
+              activeTab === '전략'
+                ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
+                : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
+            ]"
+            @click.prevent="activeTab = '전략'"
+            >전략</a
+          >
+        </li>
+        <li class="me-2">
+          <a
+            href="#"
+            :class="[
+              'inline-block p-4 rounded-t-lg',
+              activeTab === '요약'
+                ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
+                : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
+            ]"
+            @click.prevent="activeTab = '요약'"
+            >요약</a
+          >
+        </li>
+        <li class="me-2">
+          <a
+            href="#"
+            :class="[
+              'inline-block p-4 rounded-t-lg',
+              activeTab === '성과'
+                ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
+                : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
+            ]"
+            @click.prevent="activeTab = '성과'"
+            >성과</a
+          >
+        </li>
+        <li class="me-2">
+          <a
+            href="#"
+            :class="[
+              'inline-block p-4 rounded-t-lg',
+              activeTab === '거래 분석'
+                ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
+                : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
+            ]"
+            @click.prevent="activeTab = '거래 분석'"
+            >거래 분석</a
+          >
+        </li>
+        <li class="me-2">
+          <a
+            href="#"
+            :class="[
+              'inline-block p-4 rounded-t-lg',
+              activeTab === '거래목록'
+                ? 'text-blue-600 bg-gray-100 active dark:bg-gray-800 dark:text-blue-500'
+                : 'hover:text-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 dark:hover:text-gray-300',
+            ]"
+            @click.prevent="activeTab = '거래목록'"
+            >거래목록</a
+          >
+        </li>
+      </ul>
+      <div class="flex items-center gap-4">
+        <!-- 날짜 선택 -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-4">
+              <!-- Advanced Settings Button -->
+              <button
+                id="step5"
+                @click="showAdvancedSettingsModal = true"
+                class="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
+              >
+                고급설정
+              </button>
+              <div id="step4" class="flex gap-4">
+                <div class="relative">
+                  <label class="block text-gray-300 text-sm mb-1">시작일</label>
+                  <div class="relative w-40">
+                    <DatePicker
+                      v-model="rawStartDate"
+                      dateFormat="yy-mm-dd"
+                      showIcon
+                      fluid
+                      iconDisplay="input"
+                      :maxDate="new Date(rawEndDate) || new Date()"
+                      :minDate="new Date(startDate)"
+                    >
+                      <template #footer>
+                        <div class="mt-2">
+                          <!-- minDate 로 바로 점프 -->
+                          <Button
+                            class="w-full"
+                            label="마지막 날 선택"
+                            size="small"
+                            @click="rawStartDate = new Date(startDate)"
+                          ></Button>
+                        </div>
+                      </template>
+                    </DatePicker>
+                  </div>
                 </div>
-              </div>
-              <div class="relative">
-                <label class="block text-gray-300 text-sm mb-1">종료일</label>
-                <div class="relative w-40">
-                  <DatePicker
-                    v-model="rawEndDate"
-                    dateFormat="yy-mm-dd"
-                    showIcon
-                    fluid
-                    iconDisplay="input"
-                    :minDate="new Date(rawStartDate) || new Date(startDate)"
-                    :maxDate="new Date(Date.now()-24 * 60 * 60 * 1000)"
-                  />
+                <div class="relative">
+                  <label class="block text-gray-300 text-sm mb-1">종료일</label>
+                  <div class="relative w-40">
+                    <DatePicker
+                      v-model="rawEndDate"
+                      dateFormat="yy-mm-dd"
+                      showIcon
+                      fluid
+                      iconDisplay="input"
+                      :minDate="new Date(rawStartDate) || new Date(startDate)"
+                      :maxDate="new Date(Date.now() - 24 * 60 * 60 * 1000)"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- Advanced Settings Modal -->
-      <div
-        v-if="showAdvancedSettingsModal"
-        class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
-      >
+        <!-- Advanced Settings Modal -->
         <div
-          class="bg-gray-900 rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+          v-if="showAdvancedSettingsModal"
+          class="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50"
         >
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-xl font-semibold text-white">고급설정</h3>
-            <button
-              @click="showAdvancedSettingsModal = false"
-              class="text-gray-400 hover:text-gray-200"
-            >
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </button>
-          </div>
-
-          <!-- Modal Content (Advanced Settings Form) -->
-          <div class="space-y-4">
-            <!-- 초기 자본금 -->
-            <div class="flex items-center gap-2">
-              <label for="initialCapital" class="block text-gray-300 text-sm mb-1 w-32"
-                >초기 자본금</label
+          <div
+            class="bg-gray-900 rounded-lg shadow-xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+          >
+            <div class="flex justify-between items-center mb-6">
+              <h3 class="text-xl font-semibold text-white">고급설정</h3>
+              <button
+                @click="showAdvancedSettingsModal = false"
+                class="text-gray-400 hover:text-gray-200"
               >
-              <input
-                type="number"
-                id="initialCapital"
-                v-model="strategyStore.advancedSettings.initialCapital"
-                class="w-32 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
             </div>
 
-            <!-- 베이스 통화 -->
-            <div class="flex items-center gap-2">
-              <label for="baseCurrency" class="block text-gray-300 text-sm mb-1 w-32"
-                >베이스 통화</label
-              >
-              <select
-                id="baseCurrency"
-                v-model="strategyStore.advancedSettings.baseCurrency"
-                class="w-32 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="기본설정">기본설정</option>
-                <option value="USD">USD</option>
-                <option value="KRW">KRW</option>
-              </select>
-            </div>
-
-            <!-- 오더 사이즈 -->
-            <div class="flex items-center gap-2">
-              <label for="orderSize" class="block text-gray-300 text-sm mb-1 w-32"
-                >오더 사이즈</label
-              >
-              <input
-                type="number"
-                id="orderSize"
-                v-model="strategyStore.advancedSettings.orderSize"
-                class="w-32 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <select
-                id="orderSizeUnit"
-                v-model="strategyStore.advancedSettings.orderSizeUnit"
-                class="bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-26"
-              >
-                <option value="%">자기자본 %</option>
-                <option value="수량">수량</option>
-                <option value="usdt">USDT</option>
-              </select>
-            </div>
-
-            <!-- 피라미딩 -->
-            <div class="flex items-center gap-2">
-              <label for="pyramiding" class="block text-gray-300 text-sm mb-1 w-32">피라미딩</label>
-              <input
-                disabled
-                type="number"
-                id="pyramiding"
-                v-model="strategyStore.advancedSettings.pyramiding"
-                class="w-32 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <span class="text-white">오더</span>
-            </div>
-
-            <!-- 코스트 시뮬레이션 섹션 -->
-            <h4 class="text-md font-medium text-gray-400 mt-6 mb-2">코스트 시뮬레이션</h4>
+            <!-- Modal Content (Advanced Settings Form) -->
             <div class="space-y-4">
-              <!-- 커미션 -->
+              <!-- 초기 자본금 -->
               <div class="flex items-center gap-2">
-                <label for="commission" class="block text-gray-300 text-sm mb-1 w-32">커미션</label>
+                <label for="initialCapital" class="block text-gray-300 text-sm mb-1 w-32"
+                  >초기 자본금</label
+                >
                 <input
                   type="number"
-                  id="commission"
-                  v-model="strategyStore.advancedSettings.commission"
+                  id="initialCapital"
+                  v-model="portfolioStore.advancedSettings.initialCapital"
                   class="w-32 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <select
-                  id="commissionUnit"
-                  v-model="strategyStore.advancedSettings.commissionUnit"
-                  class="bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 w-26"
+              </div>
+
+              <!-- 주기 리밸런싱 -->
+              <div class="flex items-center gap-2">
+                <label for="rebalanceFrequency" class="block text-gray-300 text-sm mb-1 w-32"
+                  >주기 리밸런싱</label
                 >
-                  <option value="%">%</option>
-                  <option value="컨트랙트당 USDT">컨트랙트당 USDT</option>
-                  <option value="오더당 USDT">오더당 USDT</option>
+                <select
+                  id="rebalanceFrequency"
+                  v-model="portfolioStore.advancedSettings.rebalanceFrequency"
+                  class="w-40 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="none">하지 않음</option>
+                  <option value="weekly">주별</option>
+                  <option value="monthly">월별</option>
+                  <option value="quarterly">분기별</option>
+                  <option value="semiannually">반기별</option>
+                  <option value="annually">연간</option>
                 </select>
               </div>
 
-              <!-- 리밋오더가격 검증 -->
+              <!-- 밴드 리밸런싱 -->
               <div class="flex items-center gap-2">
-                <label
-                  for="limitOrderPriceVerification"
-                  class="block text-gray-300 text-sm mb-1 w-32"
-                  >리밋오더가격 검증</label
+                <label for="bandRebalance" class="block text-gray-300 text-sm mb-1 w-32"
+                  >밴드 리밸런싱 (%)</label
                 >
                 <input
-                  disabled
                   type="number"
-                  id="limitOrderPriceVerification"
-                  v-model="strategyStore.advancedSettings.limitOrderPriceVerification"
+                  id="bandRebalance"
+                  v-model="portfolioStore.advancedSettings.bandRebalance"
                   class="w-32 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <span class="text-white">틱</span>
               </div>
 
-              <!-- 슬리피지 -->
+              <!-- 수수료 선택 -->
               <div class="flex items-center gap-2">
-                <label for="slippage" class="block text-gray-300 text-sm mb-1 w-32">슬리피지</label>
-                <input
-                  disabled
-                  type="number"
-                  id="slippage"
-                  v-model="strategyStore.advancedSettings.slippage"
-                  class="w-32 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span class="text-white">틱</span>
-              </div>
-            </div>
-
-            <!-- 마진 섹션 -->
-            <h4 class="text-md font-medium text-gray-400 mt-6 mb-2">마진</h4>
-            <div class="space-y-4">
-              <!-- 롱 포지션 증거금 -->
-              <div class="flex items-center gap-2">
-                <label for="longPositionMargin" class="block text-gray-300 text-sm mb-1 w-32"
-                  >롱 포지션 증거금</label
+                <label for="commission" class="block text-gray-300 text-sm mb-1 w-32"
+                  >거래 수수료 (%)</label
                 >
                 <input
-                  disabled
                   type="number"
-                  id="longPositionMargin"
-                  v-model="strategyStore.advancedSettings.longPositionMargin"
+                  id="commission"
+                  v-model="portfolioStore.advancedSettings.commission"
                   class="w-32 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <span class="text-white">%</span>
-              </div>
-
-              <!-- 숏 포지션 증거금 -->
-              <div class="flex items-center gap-2">
-                <label for="shortPositionMargin" class="block text-gray-300 text-sm mb-1 w-32"
-                  >숏 포지션 증거금</label
-                >
-                <input
-                  disabled
-                  type="number"
-                  id="shortPositionMargin"
-                  v-model="strategyStore.advancedSettings.shortPositionMargin"
-                  class="w-32 bg-gray-700 text-white rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <span class="text-white">%</span>
               </div>
             </div>
 
-            <!-- 재계산 섹션 -->
-            <h4 class="text-md font-medium text-gray-400 mt-6 mb-2">재계산</h4>
-            <div class="space-y-2">
-              <!-- 오더 체결 뒤 -->
-              <div class="flex items-center">
-                <input
-                  disabled
-                  type="checkbox"
-                  id="recalculateAfterOrder"
-                  v-model="strategyStore.advancedSettings.recalculateAfterOrder"
-                  class="form-checkbox h-4 w-4 text-blue-600 rounded"
-                />
-                <label for="recalculateAfterOrder" class="ml-2 text-gray-300">오더 체결 뒤</label>
-              </div>
-
-              <!-- 매틱마다 -->
-              <div class="flex items-center">
-                <input
-                  disabled
-                  type="checkbox"
-                  id="recalculatePerTick"
-                  v-model="strategyStore.advancedSettings.recalculatePerTick"
-                  class="form-checkbox h-4 w-4 text-blue-600 rounded"
-                />
-                <label for="recalculatePerTick" class="ml-2 text-gray-300">매틱마다</label>
-              </div>
+            <!-- Modal Footer Buttons -->
+            <div class="mt-6 flex justify-end gap-3">
+              <button
+                @click="showAdvancedSettingsModal = false"
+                class="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+              >
+                취소
+              </button>
+              <button
+                @click="saveAdvancedSettings"
+                class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                확인
+              </button>
             </div>
-
-            <!-- 주문 처리 섹션 -->
-            <h4 class="text-md font-medium text-gray-400 mt-6 mb-2">주문 처리</h4>
-            <div class="space-y-2">
-              <!-- 바 돋보기 사용 -->
-              <div class="flex items-center">
-                <input
-                  disabled
-                  type="checkbox"
-                  id="useBarMagnifier"
-                  v-model="strategyStore.advancedSettings.useBarMagnifier"
-                  class="form-checkbox h-4 w-4 text-blue-600 rounded"
-                />
-                <label for="useBarMagnifier" class="ml-2 text-gray-300">바 돋보기 사용</label>
-              </div>
-
-              <!-- 봉종가에 -->
-              <div class="flex items-center">
-                <input
-                  disabled
-                  type="checkbox"
-                  id="atClosePrice"
-                  v-model="strategyStore.advancedSettings.atClosePrice"
-                  class="form-checkbox h-4 w-4 text-blue-600 rounded"
-                />
-                <label for="atClosePrice" class="ml-2 text-gray-300">봉종가에</label>
-              </div>
-
-              <!-- 표준 OHLC 사용 -->
-              <div class="flex items-center">
-                <input
-                  disabled
-                  type="checkbox"
-                  id="useStandardOHLC"
-                  v-model="strategyStore.advancedSettings.useStandardOHLC"
-                  class="form-checkbox h-4 w-4 text-blue-600 rounded"
-                />
-                <label for="useStandardOHLC" class="ml-2 text-gray-300">표준 OHLC 사용</label>
-              </div>
-            </div>
-          </div>
-
-          <!-- Modal Footer Buttons -->
-          <div class="mt-6 flex justify-end gap-3">
-            <button
-              @click="showAdvancedSettingsModal = false"
-              class="px-6 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
-            >
-              취소
-            </button>
-            <button
-              @click="saveAdvancedSettings"
-              class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              확인
-            </button>
           </div>
         </div>
       </div>
-
+    </div>
+    <!-- 전략 탭 내용 -->
+    <div v-if="activeTab === '전략'" class="flex-1 flex flex-col min-h-0">
       <!-- 전략 설정 -->
       <div class="mb-4 flex-1 overflow-y-auto">
         <div class="grid grid-cols-2 gap-4 h-full">
@@ -984,7 +822,7 @@ const runBacktest = async () => {
   // console.log(JSON.stringify(data.conditions))
 
   try {
-    const response = await axios.post('/api/v1/backtest', data)
+    const response = await axios.post('/api/v1/backtest/strategy', data)
 
     const result = { ...data, ...response.data }
 
@@ -1223,31 +1061,6 @@ const calculateTradeMetrics = (data) => {
   }
 }
 
-// const formatValue = (metric, key) => {
-//   const item = metric[key]
-//   if (item.value === undefined || item.value === null) return '-'
-//   let sign = item.value > 0 ? '+' : ''
-//   let suffix = ' USDT'
-
-//   if (
-//     metric.name === '지불된 수수료' ||
-//     metric.name === '총손실' ||
-//     metric.name === '최대 자본 상승' ||
-//     metric.name === '최대 자본 감소'
-//   ) {
-//     sign = ''
-//   }
-//   if (metric.name === '총수익' && item.value === 0) {
-//     sign = ''
-//   }
-
-//   if (item.value === 0 && (metric.name === '총수익' || metric.name === '총손실')) {
-//     return `0${suffix}`
-//   }
-
-//   return `${sign}${item.value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}${suffix}`
-// }
-
 // 외부에 노출할 메서드들
 defineExpose({
   removeCondition,
@@ -1292,7 +1105,7 @@ const tradeList = ref([])
 const rawStartDate = ref(
   strategyStore.backtestPeriod.startDate
     ? new Date(strategyStore.backtestPeriod.startDate) // 🎯 유효 문자열이면 Date로
-    : new Date(Date.now()-24 * 60 * 60 * 1000),
+    : new Date(Date.now() - 24 * 60 * 60 * 1000),
 )
 
 /* ✅ 1. computed: 항상 최신 값 유지 */
@@ -1313,7 +1126,7 @@ watch(rawStartDate, (val) => {
 const rawEndDate = ref(
   strategyStore.backtestPeriod.endDate
     ? new Date(strategyStore.backtestPeriod.endDate) // 🎯 유효 문자열이면 Date로
-    : new Date(Date.now()-24 * 60 * 60 * 1000),
+    : new Date(Date.now() - 24 * 60 * 60 * 1000),
 )
 
 watch(rawEndDate, (val) => {
