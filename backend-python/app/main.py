@@ -2,7 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware  # ✅ 꼭 필요!
 from dotenv import load_dotenv
 from app.api.v1.endpoints import candles
-from app.api.v1.endpoints import backtest
+from app.api.v1.endpoints import strategy_backtest
+from app.api.v1.endpoints import portfolio_backtest
 
 load_dotenv()
 
@@ -23,4 +24,6 @@ app.add_middleware(
 )
 
 app.include_router(candles.router, prefix="/api/v1")
-app.include_router(backtest.router, prefix="/api/v1")
+app.include_router(strategy_backtest.router, prefix="/api/v1/backtest")
+app.include_router(portfolio_backtest.router, prefix="/api/v1/backtest")
+
