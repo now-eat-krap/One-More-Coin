@@ -31,6 +31,17 @@ async function bootstrap () {
      .use(router)
      .use(PrimeVue, { theme: { preset: Aura }, locale: koLocale })
 
+
+  // ✅ Google Analytics page_view 전송 추가
+  router.afterEach((to) => {
+    if (typeof gtag === 'function') {
+      gtag('event', 'page_view', {
+        page_path: to.fullPath,
+        page_title: document.title,
+      })
+    }
+  })
+  
   /* 2) 로그인 상태 복원 */
   const auth = useAuthStore()
   try {
