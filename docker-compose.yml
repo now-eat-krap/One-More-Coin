@@ -1,78 +1,36 @@
 version: "3.9"
 
 services:
-  # ─────────── Vue + Nginx ───────────
   frontend:
     image: ghcr.io/now-eat-krap/one-more-coin/frontend:latest
     ports:
-      - "80:80"                      # HTTP
-      - "8443:443"
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
+      - "8443:443"  # 내부는 443 유지
     environment:
       DOMAIN: one-more-coin.com
     depends_on: [spring, fastapi]
 
-
-  # ─────────── Spring Boot ───────────
   spring:
     image: ghcr.io/now-eat-krap/one-more-coin/backend-java:latest
     environment:
-      OAUTH_CALLBACK_BASE: ${OAUTH_REDIRECT_BASE}
-      # ─── DB ───
-      DB_HOST:     ${DB_HOST}
-      DB_PORT:     ${DB_PORT}
-      DB_NAME:     ${DB_NAME}
-      DB_USER:     ${DB_USER}
-      DB_PASSWORD: ${DB_PASSWORD}
-
-      # ─── Redis ───
-      REDIS_HOST:  ${REDIS_HOST}
-      REDIS_PORT:  ${REDIS_PORT}
-
-      # ─── OAuth & JWT ───
-      NAVER_CLIENT_ID:     ${NAVER_CLIENT_ID}
-      NAVER_CLIENT_SECRET: ${NAVER_CLIENT_SECRET}
-      GOOGLE_CLIENT_ID:    ${GOOGLE_CLIENT_ID}
-      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-      KAKAO_CLIENT_ID:     ${KAKAO_CLIENT_ID}
-      KAKAO_CLIENT_SECRET: ${KAKAO_CLIENT_SECRET}
-      OAUTH_REDIRECT_BASE: ${OAUTH_REDIRECT_BASE}
-
-      JWT_SECRET: ${JWT_SECRET}
+      # ...생략
     depends_on: [redis]
 
-  # ─────────── FastAPI ───────────
   fastapi:
     image: ghcr.io/now-eat-krap/one-more-coin/backend-python:latest
     ports:
       - "8000:8000"
     environment:
-      DB_URL:    postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}
-      REDIS_URL: redis://${REDIS_HOST}:${REDIS_PORT}/0
-      JWT_SECRET: ${JWT_SECRET}
+      # ...생략
     depends_on: [redis]
 
-  # ─────────── Redis ───────────
   redis:
     image: redis:7-alpine
-    command: ["redis-server",
-              "--maxmemory", "128mb",
-              "--maxmemory-policy", "allkeys-lru"]
     ports:
       - "6379:6379"
     volumes:
       - ./redis-data:/data
 
-  # ─────────── Certbot (1회용) ───────────
-  certbot:
-    image: certbot/certbot:latest
-    profiles: ["cert"]        # 필요할 때만 실행하도록 profile 지정
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: >
-      certonly --webroot -w /var/www/certbot
-      --email taewonb916@gmail.com --agree-tos --no-eff-email
-      -d one-more-coin.com -d www.one-more-coin.com
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: always
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TUNNEL_TOKEN}
